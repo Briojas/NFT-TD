@@ -242,6 +242,18 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
+"@wixc3/board-core@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@wixc3/board-core/-/board-core-2.2.0.tgz#dadde24a0a92f58a69d6e0680399dde06dfc39f6"
+  integrity sha512-BxcashfyXozqpJRwIxVuE4zU/AR1txVvqNzZ0FRJAyD4CoHVgaxLhLUJN5gG6zm2/hBC7NeWc/nzt2VKnO8t5w==
+
+"@wixc3/react-board@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@wixc3/react-board/-/react-board-2.2.0.tgz#108cc19a1b82e75ff25846a19fd7a54f67dd3af4"
+  integrity sha512-t/tVCPl6zTl2A2v8SDrTUb6h1Gl/QokjVlg0e+4qpdfJrBvAhuFeq3LS/fnGtVeIXzoMuI7RSSQQumQ8Z3Rcuw==
+  dependencies:
+    "@wixc3/board-core" "^2.2.0"
+
 acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
