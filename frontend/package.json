@@ -9,8 +9,11 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@ethersproject/units": "^5.7.0",
     "@web3-react/core": "^8.2.0",
     "@web3-react/metamask": "^8.2.1",
+    "@web3-react/network": "^8.2.0",
+    "@web3-react/walletconnect": "^8.2.0",
     "classnames": "^2.3.2",
     "ethers": "^6.3.0",
     "react": "^18.2.0",
