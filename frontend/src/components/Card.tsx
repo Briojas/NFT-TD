@@ -3,10 +3,8 @@ import type { MetaMask } from '@web3-react/metamask';
 
 import { getName } from '../utils';
 import { Accounts } from './Accounts';
-// import { Chain } from './Chain';
-// import { ConnectWithSelect } from './ConnectWithSelect';
 import { Status } from './Status';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 interface Props {
     connector: MetaMask;
@@ -15,7 +13,7 @@ interface Props {
     isActivating: ReturnType<Web3ReactHooks['useIsActivating']>;
     isActive: ReturnType<Web3ReactHooks['useIsActive']>;
     error: Error | undefined;
-    setError: (error: Error | undefined) => void;
+    setError: Dispatch<SetStateAction<undefined>>;
     ENSNames: ReturnType<Web3ReactHooks['useENSNames']>;
     provider?: ReturnType<Web3ReactHooks['useProvider']>;
     accounts?: string[];

@@ -37,22 +37,12 @@ export function getAddChainParameters(chainId: number): AddEthereumChainParamete
     }
 }
 
-const getInfuraUrlFor = (network: string) =>
-    process.env.infuraKey ? `https://${network}.infura.io/v3/${process.env.infuraKey}` : undefined;
-const getAlchemyUrlFor = (network: string) =>
-    process.env.alchemyKey
-        ? `https://${network}.alchemyapi.io/v2/${process.env.alchemyKey}`
-        : undefined;
 
 type ChainConfig = { [chainId: number]: BasicChainInformation | ExtendedChainInformation };
 
 export const MAINNET_CHAINS: ChainConfig = {
     1: {
-        urls: [
-            getInfuraUrlFor('mainnet'),
-            getAlchemyUrlFor('eth-mainnet'),
-            'https://cloudflare-eth.com',
-        ].filter(Boolean),
+        urls: ['https://cloudflare-eth.com'],
         name: 'Mainnet',
     },
 };
