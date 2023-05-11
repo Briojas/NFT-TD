@@ -6,6 +6,7 @@ import { Accounts } from './Accounts';
 // import { Chain } from './Chain';
 // import { ConnectWithSelect } from './ConnectWithSelect';
 import { Status } from './Status';
+import { useState, useEffect } from 'react';
 
 interface Props {
     connector: MetaMask;
@@ -32,6 +33,14 @@ export function Card({
     accounts,
     provider,
 }: Props) {
+    const [hasMetamask, setHasMetamask] = useState(false);
+
+    useEffect(() => {
+        if (typeof window.ethereum !== 'undefined') {
+            setHasMetamask(true);
+        }
+    }, []);
+
     return (
         <div
             style={{
@@ -54,15 +63,33 @@ export function Card({
             <div style={{ marginBottom: '1rem' }}>
                 <Accounts accounts={accounts} provider={provider} ENSNames={ENSNames} />
             </div>
-            {/* <ConnectWithSelect
-                connector={connector}
-                activeChainId={activeChainId}
-                chainIds={chainIds}
-                isActivating={isActivating}
-                isActive={isActive}
-                error={error}
-                setError={setError}
-            /> */}
+            <button
+                onClick={() => {
+                    if (connector?.deactivate) {
+                        void connector.deactivate();
+                    } else {
+                        void connector.resetState();
+                    }
+                }}
+            >
+                Disconnect
+            </button>
+            {hasMetamask ? (
+                isActive ? (
+                    <i> Wallet: {accounts} </i>
+                ) : (
+                    <button
+                        onClick={() => {
+                            connector.activate();
+                            setHasMetamask(true);
+                        }}
+                    >
+                        Connect
+                    </button>
+                )
+            ) : (
+                <a href="https://metamask.io/"> Install Metamask </a>
+            )}
         </div>
     );
 }
