@@ -1,9 +1,9 @@
 import type { Web3ReactHooks } from '@web3-react/core';
 import type { MetaMask } from '@web3-react/metamask';
 
-import { getName } from '../utils';
-import { Accounts } from './Accounts';
-import { Status } from './Status';
+import { getName } from '../../utils';
+import { Accounts } from './accounts';
+import { Status } from './status';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
     accounts?: string[];
 }
 
-export function Card({
+export function Connect({
     connector,
     activeChainId,
     chainIds,
@@ -57,7 +57,6 @@ export function Card({
             <div style={{ marginBottom: '1rem' }}>
                 <Status isActivating={isActivating} isActive={isActive} error={error} />
             </div>
-            {/* <Chain chainId={activeChainId} /> */}
             <div style={{ marginBottom: '1rem' }}>
                 <Accounts accounts={accounts} provider={provider} ENSNames={ENSNames} />
             </div>
