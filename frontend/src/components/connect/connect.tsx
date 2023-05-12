@@ -1,3 +1,6 @@
+import styles from './connect.module.scss';
+import classNames from 'classnames';
+
 import type { Web3ReactHooks } from '@web3-react/core';
 import type { MetaMask } from '@web3-react/metamask';
 
@@ -6,7 +9,8 @@ import { Accounts } from './accounts';
 import { Status } from './status';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
-interface Props {
+export interface Props {
+    className?: string;
     connector: MetaMask;
     activeChainId: ReturnType<Web3ReactHooks['useChainId']>;
     chainIds?: ReturnType<Web3ReactHooks['useChainId']>[];
@@ -20,6 +24,7 @@ interface Props {
 }
 
 export function Connect({
+    className,
     connector,
     activeChainId,
     chainIds,
@@ -40,19 +45,7 @@ export function Connect({
     }, []);
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                width: '20rem',
-                padding: '1rem',
-                margin: '1rem',
-                overflow: 'auto',
-                border: '1px solid',
-                borderRadius: '1rem',
-            }}
-        >
+        <div className={classNames(styles.root, className)}>
             <b>{getName(connector)}</b>
             <div style={{ marginBottom: '1rem' }}>
                 <Status isActivating={isActivating} isActive={isActive} error={error} />
