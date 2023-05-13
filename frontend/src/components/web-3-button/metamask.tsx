@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { hooks, metaMask } from '../../connectors/metamask';
-import { Connect } from './connect';
+import { Web3Button } from './web-3-button';
 
 const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider, useENSNames } = hooks;
 
@@ -25,7 +25,7 @@ export default function Metamask() {
     }, []);
 
     return (
-        <Connect
+        <Web3Button
             connector={metaMask}
             activeChainId={chainId}
             isActivating={isActivating}

@@ -1,5 +1,5 @@
-import Metamask from './components/connect/metamask';
-import Wrapper from './components/connect/wrapper';
+import Metamask from './components/web-3-button/metamask';
+import Wrapper from './components/web-3-button/wrapper';
 
 export default function App() {
     return (
