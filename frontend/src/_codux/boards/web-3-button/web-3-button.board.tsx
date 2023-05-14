@@ -6,12 +6,13 @@ import { Dispatch, SetStateAction } from 'react';
 
 const chainId = 11155111;
 const accounts = ['0x709A77DfAAd078b257ec8D6d2Fd425727BDb1722'];
-const isActivating = true;
+const isActivating = false;
 const isActive = true;
 const provider = undefined;
 const ENSNames = [undefined];
 const error = undefined;
 const setError = null as unknown as Dispatch<SetStateAction<undefined>>;
+const testHasMetamask = true;
 
 export default createBoard({
     name: 'Web3Button',
@@ -26,6 +27,7 @@ export default createBoard({
             accounts={accounts}
             provider={provider}
             ENSNames={ENSNames}
+            testHasMetamask={testHasMetamask}
         />
     ),
 });

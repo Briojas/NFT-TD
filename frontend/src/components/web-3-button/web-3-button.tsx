@@ -21,6 +21,7 @@ export interface Web3ButtonProps {
     ENSNames: ReturnType<Web3ReactHooks['useENSNames']>;
     provider?: ReturnType<Web3ReactHooks['useProvider']>;
     accounts?: string[];
+    testHasMetamask?: boolean;
 }
 
 export const Web3Button = ({
@@ -35,6 +36,7 @@ export const Web3Button = ({
     ENSNames,
     accounts,
     provider,
+    testHasMetamask,
 }: Web3ButtonProps) => {
     const [hasMetamask, setHasMetamask] = useState(false);
 
@@ -46,11 +48,10 @@ export const Web3Button = ({
 
     return (
         <div className={classNames(styles.root, className)}>
-            <div />
-            {hasMetamask ? (
+            {hasMetamask || testHasMetamask ? (
                 isActive ? (
                     <div>
-                        <i> Wallet: {accounts} </i>
+                        {/* <text className={classNames(styles.root, styles.account)}>{accounts}</text> */}
                         <button
                             onClick={() => {
                                 if (connector?.deactivate) {
@@ -59,26 +60,28 @@ export const Web3Button = ({
                                     void connector.resetState();
                                 }
                             }}
+                            className={classNames(styles.root, styles.disconnect)}
                         >
-                            Disconnect
+                            {accounts}
                         </button>
                     </div>
                 ) : (
                     <div>
-                        <div>
-                            <button
-                                onClick={() => {
-                                    connector.activate();
-                                    setHasMetamask(true);
-                                }}
-                            >
-                                Connect
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => {
+                                connector.activate();
+                                setHasMetamask(true);
+                            }}
+                            className={styles.connect}
+                        >
+                            Connect
+                        </button>
                     </div>
                 )
             ) : (
-                <a href="https://metamask.io/">Get Metamask</a>
+                <a href="https://metamask.io/" className={styles.link}>
+                    Get Metamask
+                </a>
             )}
         </div>
     );

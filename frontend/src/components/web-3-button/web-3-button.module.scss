@@ -1,2 +1,30 @@
 .root {
+  max-width: 80px;
+  width: 80px;
+}
+.disconnect {
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  width: 80px;
+  font-style: italic;
+  background-image: none;
+  background-color: #2adf14;
+  border-radius: 20px;
+}
+.account {
+  display: inline;
+  overflow: visible;
+  font-weight: 100;
+  font-size: 12px;
+  align-self: start;
+}
+.connect {
+  border-radius: 20px;
+  background-color: #ff7070;
+}
+.link {
+  font-size: 12px;
 }

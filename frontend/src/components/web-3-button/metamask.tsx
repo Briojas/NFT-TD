@@ -17,6 +17,8 @@ export default function Metamask() {
 
     const [error, setError] = useState(undefined);
 
+    const testHasMetamask = false;
+
     // attempt to connect eagerly on mount
     useEffect(() => {
         void metaMask.connectEagerly().catch(() => {
@@ -35,6 +37,7 @@ export default function Metamask() {
             accounts={accounts}
             provider={provider}
             ENSNames={ENSNames}
+            testHasMetamask={testHasMetamask}
         />
     );
 }
