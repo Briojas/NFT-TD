@@ -16,6 +16,7 @@ python-dotenv = "==0.21.0"
 pytz = "==2022.6"
 sqlparse = "==0.4.3"
 tzdata = "==2022.6"
+requests = "*"
 
 [dev-packages]
 
