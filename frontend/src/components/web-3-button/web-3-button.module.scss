@@ -2,6 +2,11 @@
   width: 80px;
   height: 50px;
   background-color: #4d4d4d;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
 }
 .disconnect {
   white-space: nowrap;
@@ -11,17 +16,23 @@
   width: 80px;
   font-style: normal;
   background-image: none;
-  background-color: #2adf14;
+  background-color: #ffffff;
   border-radius: 20px;
   font-weight: 600;
+  height: 30px;
+  opacity: 1;
+  box-shadow: 3px 3px 2px rgba(0, 0, 0, 0);
+  cursor: auto;
+  border: 2px solid #ffffff;
 }
 .connect {
   border-radius: 20px;
-  background-color: #ff7070;
+  background-color: #ffffff;
   width: 80px;
   font-weight: 600;
   height: 30px;
   align-self: center;
+  border: 2px solid #ffffff;
 }
 .link {
   display: flex;
@@ -29,11 +40,11 @@
   flex-direction: row;
   font-weight: 600;
   color: #ffffff;
-  padding: 5px;
+  padding: 0px;
   align-items: center;
   justify-items: center;
   justify-content: space-between;
   align-content: space-between;
   align-self: center;
-  font-size: 14px;
+  text-align: center;
 }

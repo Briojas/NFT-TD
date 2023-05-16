@@ -7,11 +7,12 @@
   flex-direction: row;
   flex-wrap: nowrap;
   height: 50px;
-  justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid #ffffff;
   padding-right: 12px;
   padding-left: 12px;
+  justify-items: center;
+  justify-content: space-between;
 }
 .play {
   color: #ffffff;

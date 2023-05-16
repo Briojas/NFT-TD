@@ -3,6 +3,7 @@ import type { MetaMask } from '@web3-react/metamask';
 
 import { hooks as metaMaskHooks, metaMask } from '../../connectors/metamask';
 import { getName } from '../../utils';
+import { NavBar } from '../nav-bar/nav-bar';
 
 const connectors: [MetaMask, Web3ReactHooks][] = [[metaMask, metaMaskHooks]];
 
@@ -16,6 +17,7 @@ export default function Wrapper() {
     return (
         <Web3ReactProvider connectors={connectors}>
             <Child />
+            <NavBar />
         </Web3ReactProvider>
     );
 }
