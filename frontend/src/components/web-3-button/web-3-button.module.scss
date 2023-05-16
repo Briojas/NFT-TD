@@ -1,30 +1,39 @@
 .root {
-  max-width: 80px;
   width: 80px;
+  height: 50px;
+  background-color: #4d4d4d;
 }
 .disconnect {
-  font-size: 12px;
   white-space: nowrap;
   text-overflow: ellipsis;
   display: block;
   overflow: hidden;
   width: 80px;
-  font-style: italic;
+  font-style: normal;
   background-image: none;
   background-color: #2adf14;
   border-radius: 20px;
-}
-.account {
-  display: inline;
-  overflow: visible;
-  font-weight: 100;
-  font-size: 12px;
-  align-self: start;
+  font-weight: 600;
 }
 .connect {
   border-radius: 20px;
   background-color: #ff7070;
+  width: 80px;
+  font-weight: 600;
+  height: 30px;
+  align-self: center;
 }
 .link {
-  font-size: 12px;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 5px;
+  align-items: center;
+  justify-items: center;
+  justify-content: space-between;
+  align-content: space-between;
+  align-self: center;
+  font-size: 14px;
 }

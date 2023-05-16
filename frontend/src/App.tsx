@@ -5,7 +5,15 @@ export default function App() {
     return (
         <>
             <Wrapper />
-            <div style={{ display: 'flex', flexFlow: 'wrap', fontFamily: 'sans-serif' }}>
+            <div
+                style={{
+                    display: 'flex',
+                    flexFlow: 'row nowrap',
+                    fontFamily: 'sans-serif',
+                    alignItems: 'stretch',
+                    justifyItems: 'stretch',
+                }}
+            >
                 <NavBar />
             </div>
         </>

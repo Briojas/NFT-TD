@@ -80,7 +80,7 @@ export const Web3Button = ({
                 )
             ) : (
                 <a href="https://metamask.io/" className={styles.link}>
-                    Get Metamask
+                    Download Metamask
                 </a>
             )}
         </div>
