@@ -1,16 +1,12 @@
 import type React from 'react';
-import { Elevation, Card, Icon } from '@blueprintjs/core';
+import { Elevation, Card } from '@blueprintjs/core';
 import classNames from 'classnames';
 import styles from './tower-card.module.scss';
 
-const defaultItemPhoto =
-    'https://static.wixstatic.com/media/610b66_21681c5c778f447aad5de30969565c61~mv2.png'; // pprmint.png (446x610)
-
 export interface TowerCardProps {
-    itemPhotoURL?: string;
-    itemName?: string;
-    itemPrice?: number;
-    itemDescription?: string;
+    tier?: number;
+    operator?: string;
+    priority?: number;
     isFavorite?: boolean;
     children?: React.ReactNode;
     className?: string;
@@ -25,18 +21,19 @@ export interface TowerCardProps {
  */
 export const TowerCard = ({
     className,
-    itemName = 'Peppermint Mocha',
-    itemPrice = 18.0,
-    itemDescription = 'An espresso roast combined with steamed milk, sweet mocha sauce and peppermint-flavored syrup, topped with whipped cream.',
+    tier,
+    priority,
+    operator,
     isFavorite = false,
     children,
 }: TowerCardProps) => {
     return (
-        <Card className={classNames(styles.product_wrapper, className)} elevation={Elevation.FOUR}>
-            <Card className={styles.product_body}>
-                <div className={styles.product_row}>
-                    <p className={styles.product_name}>{itemName}</p>
-                    <p className={styles.product_price}>{'$' + itemPrice}</p>
+        <Card className={classNames(styles['wrapper'], className)} elevation={Elevation.FOUR}>
+            <Card className={styles['tower']}>
+                <div className={styles['card-id']}>
+                    <p className={styles['tier']}>{'T' + tier}</p>
+                    <p className={styles['operator']}>{operator}</p>
+                    <p className={styles['priority']}>{'P' + priority}</p>
                 </div>
                 <div className={styles.product_row}>
                     <p className={styles.product_option}>Big</p>
@@ -49,18 +46,6 @@ export const TowerCard = ({
                 <div className={styles.product_row}>
                     <p className={styles.product_option}>Small</p>
                     <input type="radio" name="radio" />
-                </div>
-                <div className={styles.product_row}>
-                    <p className={styles.product_desc}>{itemDescription}</p>
-                </div>
-                <div className={styles.product_row}>{children}</div>
-                <div className={styles.product_row}>
-                    <button className={styles['btn-icon']} type="button">
-                        <Icon icon="heart" color={isFavorite ? '#ff7979' : 'white'} size={20} />
-                    </button>
-                    <button className={styles['btn-add']} type="button">
-                        Add to cart
-                    </button>
                 </div>
             </Card>
         </Card>
