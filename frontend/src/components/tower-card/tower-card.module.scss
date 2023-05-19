@@ -3,7 +3,7 @@
   flex-direction: column;
   font-family: 'Roboto', sans-serif;
   background-color: #ffffff;
-  border-radius: 0rem 0rem 1rem 1rem;
+  border-radius: 0rem;
   overflow: hidden;
   min-width: 100px;
   padding: 0;
@@ -32,60 +32,60 @@
   justify-items: center;
   flex-wrap: nowrap;
   align-content: space-between;
+  width: 126px;
 }
 
 .tier {
-  font-size: 22px;
-  width: 30px;
-  height: 30px;
+  height: 25px;
   border-bottom: 2px solid black;
   border-right: 2px solid black;
   align-self: center;
   margin-top: 0px;
-  padding-top: 25px;
-  padding-left: 5px;
+  padding-top: 20px;
+  padding-left: 3px;
+  display: block;
+  font-size: 18px;
+  width: 45px;
 }
 
 .operator {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 300;
   text-align: justify;
 }
 
 .priority {
-  font-size: 22px;
-  width: 30px;
-  height: 30px;
+  width: 45px;
+  height: 25px;
   border-bottom: 2px solid black;
   border-left: 2px solid black;
   align-self: center;
   margin-top: 0px;
-  padding-top: 25px;
-  padding-left: 5px;
+  padding-top: 20px;
+  padding-left: 3px;
+  font-size: 18px;
 }
 
-input[type='radio'] {
-  display: grid;
-  place-content: center;
-  appearance: none;
-  margin: 0;
-  width: 1.15em;
-  height: 1.15em;
-  border: 0.04em solid #000000;
-  border-radius: 50%;
-
-  font-size: 1.22rem;
+.adjustor {
+  background-color: #ffffff;
+  border: 0px solid #000000;
 }
 
-input[type='radio']::before {
-  content: '';
-  width: 0.46em;
-  height: 0.46em;
-  border-radius: 50%;
-  background-color: #000000;
-  transform: scale(0);
+.power {
+  display: flex;
+  flex-direction: row;
+  font-size: 14px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-items: stretch;
+  justify-content: space-around;
+  height: 35px;
+  padding: 10px 0px 0px;
 }
-
-input[type='radio']:checked::before {
-  transform: scale(1);
+.power-selector {
+  display: flex;
+  flex-direction: column;
+}
+.data-value {
+  width: 20px;
 }

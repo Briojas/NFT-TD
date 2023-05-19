@@ -1,12 +1,15 @@
 import type React from 'react';
-import { Elevation, Card } from '@blueprintjs/core';
+import { Card, Slider, Icon } from '@blueprintjs/core';
 import classNames from 'classnames';
 import styles from './tower-card.module.scss';
+import { useState } from 'react';
+import { BlueprintIcons_16Id } from '@blueprintjs/icons/lib/esm/generated-icons/16px/blueprint-icons-16';
 
 export interface TowerCardProps {
     tier?: number;
-    operator?: string;
+    operator?: BlueprintIcons_16Id;
     priority?: number;
+    power?: number;
     isFavorite?: boolean;
     children?: React.ReactNode;
     className?: string;
@@ -19,33 +22,47 @@ export interface TowerCardProps {
  * Use this demo to get a feel for how easy and fun it is to create and edit components in Codux using Blueprint.js, a 3rd party React-based UI toolkit.
  *
  */
-export const TowerCard = ({
-    className,
-    tier,
-    priority,
-    operator,
-    isFavorite = false,
-    children,
-}: TowerCardProps) => {
+export const TowerCard = ({ className, tier, priority, operator, power }: TowerCardProps) => {
+    const [sliderValue, setSliderValue] = useState<number>(8);
     return (
-        <Card className={classNames(styles['wrapper'], className)} elevation={Elevation.FOUR}>
+        <Card className={classNames(styles['wrapper'], className)}>
             <Card className={styles['tower']}>
                 <div className={styles['card-id']}>
                     <p className={styles['tier']}>{'T' + tier}</p>
-                    <p className={styles['operator']}>{operator}</p>
+                    <div>
+                        <button className={classNames(styles.plus, styles.adjustor)}>
+                            <Icon icon="caret-up" size={10} />
+                        </button>
+                        <button className={styles.adjustor}>
+                            {/* <Icon icon="chevron-down" size={8} /> */}
+                            <Icon icon="caret-down" size={10} />
+                        </button>
+                    </div>
+                    <Icon icon={operator} size={20} />
+                    <div>
+                        <button className={styles.adjustor}>
+                            <Icon icon="caret-up" size={10} />
+                        </button>
+                        <button className={styles.adjustor}>
+                            <Icon icon="caret-down" size={10} />
+                        </button>
+                    </div>
                     <p className={styles['priority']}>{'P' + priority}</p>
                 </div>
-                <div className={styles.product_row}>
-                    <p className={styles.product_option}>Big</p>
-                    <input type="radio" name="radio" defaultChecked />
+                <div className={classNames(styles.product_row, styles.power)}>
+                    <p>Power</p>
+                    <div className={styles['power-selector']}>
+                        <button className={classNames(styles.plus, styles.adjustor)}>
+                            <Icon icon="caret-up" size={10} />
+                        </button>
+                        <button className={classNames(styles.plus, styles.adjustor)}>
+                            <Icon icon="caret-down" size={10} />
+                        </button>
+                    </div>
+                    <p className={styles['data-value']}>{power}</p>
                 </div>
-                <div className={styles.product_row}>
-                    <p className={styles.product_option}>Medium</p>
-                    <input type="radio" name="radio" />
-                </div>
-                <div className={styles.product_row}>
-                    <p className={styles.product_option}>Small</p>
-                    <input type="radio" name="radio" />
+                <div>
+                    <p>Range</p>
                 </div>
             </Card>
         </Card>

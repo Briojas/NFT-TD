@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^4.19.1",
+    "@blueprintjs/icons": "^4.15.1",
     "@ethersproject/units": "^5.7.0",
     "@web3-react/core": "^8.2.0",
     "@web3-react/metamask": "^8.2.1",
