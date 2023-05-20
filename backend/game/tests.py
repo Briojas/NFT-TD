@@ -24,6 +24,17 @@ def test_inclusive_range(start: int=1, stop: int=10):
     assert max(inclusive_range) == max(exclusive_range) + 1
 
 
+def test_additive_behavior_initialization(
+        power: int=1,
+        splash: int=3,
+        radius: int=4
+):
+    behavior = models.AdditiveBehavior(power=power, splash=splash, radius=radius)
+    assert behavior.power == power
+    assert behavior.splash == splash
+    assert behavior.radius == radius
+
+
 @given(
     tier=st.integers(min_value=1, max_value=3),
     priority=st.integers(min_value=1, max_value=7)
