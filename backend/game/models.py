@@ -47,6 +47,20 @@ class AdditiveBehavior:
         self.radius = radius
 
 
+class MultiplicativeBehavior:
+    allowable_values = {
+        'power': _inclusive_range(1, 3),
+        'range': _inclusive_range(1, 7),
+        'rate': _inclusive_range(1, 10)
+    }
+
+    @_validate_inputs
+    def __init__(self, power: int, range: int, rate: int):
+        self.power = power
+        self.range = range
+        self.rate = rate
+
+
 class Card:
     allowable_values = {
         'tier': _inclusive_range(1, 3),
