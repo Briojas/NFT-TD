@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "../functions/ConfirmedOwnerUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/dev/ocr2/OCR2Abstract.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /**
  * @notice Onchain verification of reports from the offchain reporting protocol
