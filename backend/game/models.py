@@ -33,6 +33,20 @@ def _validate_inputs(func):
     return wrapper
 
 
+class AdditiveBehavior:
+    allowable_values = {
+        'power': _inclusive_range(1, 3),
+        'splash': _inclusive_range(1, 7),
+        'radius': _inclusive_range(1, 10)
+    }
+
+    @_validate_inputs
+    def __init__(self, power: int, splash: int, radius: int):
+        self.power = power
+        self.splash = splash
+        self.radius = radius
+
+
 class Card:
     allowable_values = {
         'tier': _inclusive_range(1, 3),
