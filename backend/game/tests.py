@@ -35,6 +35,17 @@ def test_additive_behavior_initialization(
     assert behavior.radius == radius
 
 
+def test_multiplicative_behavior_initialization(
+        power: int=1,
+        range: int=3,
+        rate: int=4
+):
+    behavior = models.MultiplicativeBehavior(power=power, range=range, rate=rate)
+    assert behavior.power == power
+    assert behavior.range == range
+    assert behavior.rate == rate
+
+
 @given(
     tier=st.integers(min_value=1, max_value=3),
     priority=st.integers(min_value=1, max_value=7)
