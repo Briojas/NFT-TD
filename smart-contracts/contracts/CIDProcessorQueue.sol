@@ -43,11 +43,17 @@ library CIDProcessorQueue {
 
     function join(Queue storage self, string calldata cid) internal{
         uint key = self.tickets.next_submission_key;
-        uint key_index = self.data[key].key_index;
         self.tickets.num_tickets ++;
+            //submission details
         self.data[key].ticket = self.tickets.num_tickets;
         self.data[key].cid = cid;
         self.data[key].state = State.READY;
+        handle_existing_key(self, key);
+        set_next_sub_key(self);
+    }
+
+    function handle_existing_key(Queue storage self, uint key) internal {
+        uint key_index = self.data[key].key_index;
         if (key_index > 0){ //checks if key already existed, and was overwritten
             self.keys[key_index].deleted = false; //a deleted Submission overwritten should not be marked deleted
         } else { //if key didn't exist, the queue array has grown
@@ -56,7 +62,6 @@ library CIDProcessorQueue {
             self.data[key].key_index = key_index + 1;
             self.keys[key_index].key = key;
         }
-        set_next_sub_key(self);
     }
 
     function remove(Queue storage self, uint key) internal returns (bool success) {
