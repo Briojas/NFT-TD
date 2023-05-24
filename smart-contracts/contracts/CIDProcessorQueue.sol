@@ -69,13 +69,11 @@ library CIDProcessorQueue {
     }
 
     function set_next_sub_key(Queue storage self) internal {
-        if(self.keys.length < 0){
-            self.tickets.next_submission_key = 0;
-        }
-        self.tickets.next_submission_key = Iterator.unwrap(iterator_find_next_deleted(self, 0));
+        self.tickets.next_submission_key = Iterator.unwrap(iterate_deleted(self, 0, false));
     }
 
     function find_ticket_key(Queue storage self, uint ticket) internal view returns (uint goal_key){
+        goal_key = 0;
         for(
             Iterator key = iterate_start(self);
             iterate_valid(self, key);
@@ -104,7 +102,7 @@ library CIDProcessorQueue {
     }
 
     function iterate_start(Queue storage self) internal view returns (Iterator) {
-        return iterator_skip_deleted(self, 0);
+        return iterate_deleted(self, 0, true);
     }
 
     function iterate_valid(Queue storage self, Iterator iterator) internal view returns (bool) {
@@ -112,19 +110,19 @@ library CIDProcessorQueue {
     }
 
     function iterate_next(Queue storage self, Iterator iterator) internal view returns (Iterator) {
-        return iterator_skip_deleted(self, Iterator.unwrap(iterator) + 1);
+        return iterate_deleted(self, Iterator.unwrap(iterator) + 1, true);
     }
 
-    function iterator_skip_deleted(Queue storage self, uint key_index) internal view returns (Iterator) {
-        while (key_index < self.keys.length && self.keys[key_index].deleted)
+    function iterate_deleted(Queue storage self, uint key_index, bool skip) internal view returns (Iterator) {
+        while (key_index < self.keys.length){
             key_index++;
-        return Iterator.wrap(key_index);
-    }
-    
-    function iterator_find_next_deleted(Queue storage self, uint key_index) internal view returns (Iterator) {
-        while (key_index < self.keys.length && !self.keys[key_index].deleted)
-            key_index++;
-        return Iterator.wrap(key_index);
+            if(skip && self.keys[key_index].deleted){
+                return Iterator.wrap(key_index); //returns index of next key that is not deleted
+            }else if(!skip && !self.keys[key_index].deleted){
+                return Iterator.wrap(key_index); //returns index of next key that is deleted
+            }
+        }
+        return Iterator.wrap(key_index); //returns last index; either all were deleted, or none were
     }
 
     event ticket_assigned(
