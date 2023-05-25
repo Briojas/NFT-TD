@@ -10,6 +10,7 @@ abstract contract ERC1155IPFS is ERC1155 {
     using Counters for Counters.Counter; 
     Counters.Counter private _tokenIds; 
     
+        //fed empty string to constructor because the uri is set later, per mint
     constructor() ERC1155("") {} 
     
         //for now, tokenURI is the full IPFS link to the metadata
@@ -24,6 +25,7 @@ abstract contract ERC1155IPFS is ERC1155 {
         return newItemId; 
     } 
 
+        //overwrites OpenZeppelin's uri function
     function uri(uint256 tokenId) override public view returns (string memory) { 
         return(_tokenURIs[tokenId]); 
     } 
