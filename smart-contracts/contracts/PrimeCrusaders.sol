@@ -5,8 +5,8 @@ import {Functions, FunctionsClient} from "./dev/functions/FunctionsClient.sol";
 // import "@chainlink/contracts/src/v0.8/dev/functions/FunctionsClient.sol"; // Once published
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
-import {CIDProcessorQueue} from "./CIDProcessorQueue.sol";
-import {ERC1155IPFS} from "./ERC1155IPFS.sol";
+import {CIDProcessorQueue} from "./libs/CIDProcessorQueue.sol";
+import {ERC1155IPFS} from "./libs/ERC1155IPFS.sol";
 
 contract PrimeCrusaders is ERC1155IPFS, FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using Functions for Functions.Request;
