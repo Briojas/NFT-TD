@@ -9,7 +9,7 @@ library CIDProcessorQueue {
         address payable user;
         uint key_index; //storage position in the queue array
         uint ticket; //position in the queue for execution
-        string cid; //ipfs cid of the item being processed
+        string ipfs_url; //ipfs link to the item being processed
         State state; //status of the submission
     }
 
@@ -41,13 +41,14 @@ library CIDProcessorQueue {
         self.state = State.READY;
     }
 
-    function join(Queue storage self, string calldata cid) internal{
+    function join(Queue storage self, string calldata ipfs_url) internal{
         uint key = self.tickets.next_submission_key;
         self.tickets.num_tickets ++;
             //submission details
         self.data[key].ticket = self.tickets.num_tickets;
-        self.data[key].cid = cid;
+        self.data[key].ipfs_url = ipfs_url;
         self.data[key].state = State.READY;
+
         handle_existing_key(self, key);
         set_next_sub_key(self);
     }

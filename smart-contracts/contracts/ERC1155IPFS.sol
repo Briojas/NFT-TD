@@ -12,7 +12,10 @@ abstract contract ERC1155IPFS is ERC1155 {
     
     constructor() ERC1155("") {} 
     
-        //were tokenURI is the full IPFS link to the metadata, ex: 
+        //for now, tokenURI is the full IPFS link to the metadata
+            //ex: https://ipfs.io/ipfs/bafybeidcuj7x347s2ekyicsu2udaime4dzwf7v5qob446pfspx3j765n7m/ipfs_script_template.json
+        //later, this may be adapted to ipfsURI to reduce size
+            //ex: ipfs://bafybeibnsoufr2renqzsh347nrx54wcubt5lgkeivez63xvivplfwhtpym/metadata.json
     function mintToken(string memory tokenURI, uint256 amount) public returns(uint256) { 
         uint256 newItemId = _tokenIds.current(); 
         _mint(msg.sender, newItemId, amount, "");
