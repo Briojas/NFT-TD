@@ -5,13 +5,10 @@ import {Functions, FunctionsClient} from "./dev/functions/FunctionsClient.sol";
 // import "@chainlink/contracts/src/v0.8/dev/functions/FunctionsClient.sol"; // Once published
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
+import {CIDProcessorQueue} from "./CIDProcessorQueue.sol";
+import {ERC1155IPFS} from "./ERC1155IPFS.sol";
 
-/**
- * @title Automated Functions Consumer contract
- * @notice This contract is a demonstration of using Functions.
- * @notice NOT FOR PRODUCTION USE
- */
-contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
+contract PrimeCrusaders is ERC1155IPFS, FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using Functions for Functions.Request;
 
   bytes public requestCBOR;
@@ -40,7 +37,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
     uint256 _updateInterval
-  ) FunctionsClient(oracle) ConfirmedOwner(msg.sender) {
+  ) ERC1155IPFS() FunctionsClient(oracle) ConfirmedOwner(msg.sender) {
     updateInterval = _updateInterval;
     subscriptionId = _subscriptionId;
     fulfillGasLimit = _fulfillGasLimit;
