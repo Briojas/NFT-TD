@@ -3,15 +3,18 @@ pragma solidity ^0.8.12;
 
     //using the "Iterable Mappings" Solidity example
 library CIDProcessorQueue {
-    enum State {IDLE, VERIFYING, VERIFIED, ASSESSED}
+    enum State {IDLE, ENCODED, VERIFYING, VERIFIED, size} //size is used to iterate through enum, not as a State id
+    enum Result {QUEUED, PENDING, APPROVED, DENIED}
 
     struct Submission {
         address payable user;
         uint key_index; //storage position in the queue array
         uint ticket; //position in the queue for execution
         string ipfs_url; //ipfs link to the item being processed
-        State state; //status of the submission
+        Result result; //result of the submission
     }
+    
+    //TODO: implement Batch struct to group submissions together for simultaneous processing
 
     struct Key_Flag { 
         uint key; 
@@ -47,7 +50,7 @@ library CIDProcessorQueue {
             //submission details
         self.data[key].ticket = self.tickets.num_tickets;
         self.data[key].ipfs_url = ipfs_url;
-        self.data[key].state = State.IDLE;
+        self.data[key].result = Result(0);
 
         handle_existing_key(self, key);
         set_next_sub_key(self);
@@ -96,15 +99,15 @@ library CIDProcessorQueue {
     }
 
     function update_state(Queue storage self) internal {
-        if(self.state == State.ASSESSED){
-            self.state = State.IDLE;
+        if(State(uint(self.state)) == State(uint(State.size) - 1)){
+            self.state = State(0);
         }else{
             self.state = State(uint(self.state) + 1);
         }
     }
 
-    function set_sub_state(Queue storage self, State state) internal {
-        self.data[self.tickets.curr_ticket_key].state = state;
+    function set_sub_state(Queue storage self, Result result) internal {
+        self.data[self.tickets.curr_ticket_key].result = result;
     }
 
     function iterate_start(Queue storage self) internal view returns (Iterator) {

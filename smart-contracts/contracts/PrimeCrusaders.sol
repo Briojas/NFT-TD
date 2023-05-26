@@ -14,7 +14,8 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   uint256 public mintBatchSize; 
   uint256 public lastUpkeepTimeStamp;
 
-  mapping(CIDProcessorQueue.State => function(CIDProcessorQueue.Queue storage) internal) mintingQueue;
+  mapping(CIDProcessorQueue.State => function(CIDProcessorQueue.Queue storage) internal) stateActions;
+  CIDProcessorQueue.Queue private mintingQueue;
 
   /**
    * @notice Executes once when a contract is created to initialize state variables
@@ -33,13 +34,16 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   ) ERC1155IPFS() FunctionsWrapper(oracle, subscriptionId, fulfillGasLimit) {
     mintInterval = _mintInterval;
     mintBatchSize = _mintBatchSize;
-    lastUpkeepTimeStamp = block.timestamp;
+    // lastUpkeepTimeStamp = block.timestamp; //uneeded until batch processing implemented  
 
-    mintingQueue[CIDProcessorQueue.State.IDLE] = send;
+    mintingQueue.initiate();
+
+    stateActions[CIDProcessorQueue.State.IDLE] = build;
+    stateActions[CIDProcessorQueue.State.ENCODED] = send;
     //once sent, we await the callback from Chainlink Functions, which will update the state to VERIFIED
       //callback is the fullfillRequest function in FunctionsWrapper.sol
-    mintingQueue[CIDProcessorQueue.State.VERIFIED] = process;
-    mintingQueue[CIDProcessorQueue.State.ASSESSED] = issue;
+      //callback will call update_state(): VERIFYING -> VERIFIED
+    stateActions[CIDProcessorQueue.State.VERIFIED] = issue;
   }
 
   /**
@@ -52,10 +56,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    * second element contains custom bytes data which is passed to performUpkeep when it is called by Automation.
    */
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
-    CIDProcessorQueue.State currState = self.state;
-    
-    bool queueSizeCheck = self.queue.length() < mintBatchSize;
-    bool intervalCheck = (block.timestamp - lastUpkeepTimeStamp) > mintInterval;
+    upkeepNeeded = false;
+    if (mintingQueue.state == CIDProcessorQueue.State.IDLE) {
+      upkeepNeeded = mintingQueue.tickets.curr_ticket < mintingQueue.tickets.num_tickets;
+    } else if(mintingQueue.state == CIDProcessorQueue.State.VERIFIED) {
+      upkeepNeeded = true;
+    } 
+    return (upkeepNeeded, ""); //not needed for returning, but we might use the bytes data retun later
   }
 
   /**
@@ -67,18 +74,19 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   function performUpkeep(bytes calldata) external override {
     (bool upkeepNeeded, ) = checkUpkeep("");
     require(upkeepNeeded, "upkeep not needed");
-    lastUpkeepTimeStamp = block.timestamp;
+    // lastUpkeepTimeStamp = block.timestamp; //uneeded until batch processing implemented
 
-    mintingQueue[self.state](self);
+    stateActions[mintingQueue.state](mintingQueue);
+    mintingQueue.update_state();
   }
 
-    //sends mint request off to Chainlink Functions to be verified 
-  function send(CIDProcessorQueue.Queue storage self) internal {
+    //build the Chainlink Functions request
+  function build(CIDProcessorQueue.Queue storage self) internal {
     //TODO: Implement
   }
-
-    //processes Chainlink Functions response to determine NFT validity
-  function process(CIDProcessorQueue.Queue storage self) internal {
+  
+    //sends mint request off to Chainlink Functions to be verified 
+  function send(CIDProcessorQueue.Queue storage self) internal {
     //TODO: Implement
   }
 
