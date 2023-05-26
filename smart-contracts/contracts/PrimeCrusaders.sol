@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import {CIDProcessorQueue} from "./libs/CIDProcessorQueue.sol";
 import {ERC1155IPFS} from "./libs/ERC1155IPFS.sol";
 import {FunctionsWrapper} from "./libs/FunctionsWrapper.sol";
 
 contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleInterface {
-  uint256 public updateInterval;
+  using CIDProcessorQueue for CIDProcessorQueue.State;
+  using CIDProcessorQueue for CIDProcessorQueue.Queue;
+  
+  uint256 public mintInterval; //HIGHLY considering updating to 'minterval'
+  uint256 public mintBatchSize; 
   uint256 public lastUpkeepTimeStamp;
-  uint256 public upkeepCounter;
-  uint256 public responseCounter;
+
+  mapping(CIDProcessorQueue.State => function(CIDProcessorQueue.Queue storage) internal) mintingQueue;
 
   /**
    * @notice Executes once when a contract is created to initialize state variables
@@ -19,16 +22,24 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    * @param oracle The FunctionsOracle contract
    * @param subscriptionId The Functions billing subscription ID used to pay for Functions requests
    * @param fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
-   * @param _updateInterval Time interval at which Chainlink Automation should call performUpkeep
+   * @param _mintInterval Time interval at which Chainlink Automation should call performUpkeep
    */
   constructor(
     address oracle,
     uint64 subscriptionId,
     uint32 fulfillGasLimit,
-    uint256 _updateInterval
+    uint256 _mintInterval,
+    uint256 _mintBatchSize
   ) ERC1155IPFS() FunctionsWrapper(oracle, subscriptionId, fulfillGasLimit) {
-    updateInterval = _updateInterval;
+    mintInterval = _mintInterval;
+    mintBatchSize = _mintBatchSize;
     lastUpkeepTimeStamp = block.timestamp;
+
+    mintingQueue[CIDProcessorQueue.State.IDLE] = send;
+    //once sent, we await the callback from Chainlink Functions, which will update the state to VERIFIED
+      //callback is the fullfillRequest function in FunctionsWrapper.sol
+    mintingQueue[CIDProcessorQueue.State.VERIFIED] = process;
+    mintingQueue[CIDProcessorQueue.State.ASSESSED] = issue;
   }
 
   /**
@@ -41,7 +52,10 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    * second element contains custom bytes data which is passed to performUpkeep when it is called by Automation.
    */
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
-    upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
+    CIDProcessorQueue.State currState = self.state;
+    
+    bool queueSizeCheck = self.queue.length() < mintBatchSize;
+    bool intervalCheck = (block.timestamp - lastUpkeepTimeStamp) > mintInterval;
   }
 
   /**
@@ -52,10 +66,24 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    */
   function performUpkeep(bytes calldata) external override {
     (bool upkeepNeeded, ) = checkUpkeep("");
-    require(upkeepNeeded, "Time interval not met");
+    require(upkeepNeeded, "upkeep not needed");
     lastUpkeepTimeStamp = block.timestamp;
-    upkeepCounter = upkeepCounter + 1;
 
-    
+    mintingQueue[self.state](self);
+  }
+
+    //sends mint request off to Chainlink Functions to be verified 
+  function send(CIDProcessorQueue.Queue storage self) internal {
+    //TODO: Implement
+  }
+
+    //processes Chainlink Functions response to determine NFT validity
+  function process(CIDProcessorQueue.Queue storage self) internal {
+    //TODO: Implement
+  }
+
+    //mints valid NFTs
+  function issue(CIDProcessorQueue.Queue storage self) internal {
+    //TODO: Implement
   }
 }

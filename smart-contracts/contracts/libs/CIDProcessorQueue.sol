@@ -3,7 +3,7 @@ pragma solidity ^0.8.12;
 
     //using the "Iterable Mappings" Solidity example
 library CIDProcessorQueue {
-    enum State {READY, VERIFYING, VERIFIED, ASSESSED}
+    enum State {IDLE, VERIFYING, VERIFIED, ASSESSED}
 
     struct Submission {
         address payable user;
@@ -38,7 +38,7 @@ library CIDProcessorQueue {
         self.tickets.num_tickets = 0; //will increment to 1 after first Submission
         self.tickets.curr_ticket = 0; //first ticket submitted will be ticket 1
         self.tickets.next_submission_key = 0; //first submission is placed at beginning of queue
-        self.state = State.READY;
+        self.state = State.IDLE;
     }
 
     function join(Queue storage self, string calldata ipfs_url) internal{
@@ -47,7 +47,7 @@ library CIDProcessorQueue {
             //submission details
         self.data[key].ticket = self.tickets.num_tickets;
         self.data[key].ipfs_url = ipfs_url;
-        self.data[key].state = State.READY;
+        self.data[key].state = State.IDLE;
 
         handle_existing_key(self, key);
         set_next_sub_key(self);
@@ -97,7 +97,7 @@ library CIDProcessorQueue {
 
     function update_state(Queue storage self) internal {
         if(self.state == State.ASSESSED){
-            self.state = State.READY;
+            self.state = State.IDLE;
         }else{
             self.state = State(uint(self.state) + 1);
         }
