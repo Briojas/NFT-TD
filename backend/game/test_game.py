@@ -11,10 +11,19 @@ def test_validation_wrapper():
     assert card.priority == 5
 
 
-def test_validation_wrapper_invalid_inputs():
+@given(tier=st.integers(max_value=10), priority=st.integers(max_value=10))
+def test_validation_wrapper_invalid_inputs(tier, priority):
     with pytest.raises(ValueError) as e_info:
-        card = models.Card(tier=5, priority=5)
-    assert "Tier must be an integer between 1 and 3, inclusive" in str(e_info.value)
+        models.Card(tier=tier, priority=priority)
+
+    for attribute, value in zip(["tier", "priority"], [tier, priority]):
+        allowable_range = models.Card.allowable_values[attribute]
+        if value not in allowable_range:
+            error_msg = (
+                f"{attribute.capitalize()} must be an integer "
+                f"between {min(allowable_range)} and {max(allowable_range)}, inclusive"
+            )
+            assert error_msg in str(e_info.value)
 
 
 def test_inclusive_range(start: int=1, stop: int=10):
