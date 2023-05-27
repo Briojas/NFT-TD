@@ -78,6 +78,10 @@ library CIDProcessorQueue {
         return self.data[self.tickets.curr_ticket_key].ipfs_url;
     }
 
+    function pull_ticket_result(Queue storage self) internal view returns (Result) {
+        return self.data[self.tickets.curr_ticket_key].result;
+    }
+
     function handle_existing_key(Queue storage self, uint key) internal {
         uint key_index = self.data[key].key_index;
         if (key_index > 0){ //checks if key already existed, and was overwritten

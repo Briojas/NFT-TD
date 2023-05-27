@@ -97,4 +97,15 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
       }
     }
   }
+
+  function status() public view returns (CIDProcessorQueue.State, uint256, uint256, address, string memory, CIDProcessorQueue.Result) {
+    return (
+      mintingQueue.state,
+      mintingQueue.tickets.num_tickets,
+      mintingQueue.tickets.curr_ticket,
+      mintingQueue.pull_ticket_owner(),
+      mintingQueue.pull_ticket_data(),
+      mintingQueue.pull_ticket_result()
+    );
+  }
 }
