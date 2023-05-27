@@ -1,89 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import {Functions, FunctionsClient} from "./dev/functions/FunctionsClient.sol";
-// import "@chainlink/contracts/src/v0.8/dev/functions/FunctionsClient.sol"; // Once published
-import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 import {CIDProcessorQueue} from "./libs/CIDProcessorQueue.sol";
 import {ERC1155IPFS} from "./libs/ERC1155IPFS.sol";
+import {FunctionsWrapper} from "./libs/FunctionsWrapper.sol";
 
-contract PrimeCrusaders is ERC1155IPFS, FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
-  using Functions for Functions.Request;
-
-  bytes public requestCBOR;
-  bytes32 public latestRequestId;
-  bytes public latestResponse;
-  bytes public latestError;
-  uint64 public subscriptionId;
-  uint32 public fulfillGasLimit;
-  uint256 public updateInterval;
+contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleInterface {
+  using CIDProcessorQueue for CIDProcessorQueue.Queue;
+  using CIDProcessorQueue for CIDProcessorQueue.State;
+  using CIDProcessorQueue for CIDProcessorQueue.Result;
+  
+  uint256 public mintInterval; //HIGHLY considering updating to 'minterval'
+  uint256 public mintBatchSize; 
   uint256 public lastUpkeepTimeStamp;
-  uint256 public upkeepCounter;
-  uint256 public responseCounter;
 
-  event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
+  CIDProcessorQueue.Queue private mintingQueue;
 
   /**
    * @notice Executes once when a contract is created to initialize state variables
    *
    * @param oracle The FunctionsOracle contract
-   * @param _subscriptionId The Functions billing subscription ID used to pay for Functions requests
-   * @param _fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
-   * @param _updateInterval Time interval at which Chainlink Automation should call performUpkeep
+   * @param subscriptionId The Functions billing subscription ID used to pay for Functions requests
+   * @param fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
+   * @param _mintInterval Time interval at which Chainlink Automation should call performUpkeep
    */
   constructor(
-    address oracle,
-    uint64 _subscriptionId,
-    uint32 _fulfillGasLimit,
-    uint256 _updateInterval
-  ) ERC1155IPFS() FunctionsClient(oracle) ConfirmedOwner(msg.sender) {
-    updateInterval = _updateInterval;
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    lastUpkeepTimeStamp = block.timestamp;
-  }
+    address oracle, //Sepolia Functions Oracle address: "0x649a2C205BE7A3d5e99206CEEFF30c794f0E31EC"
+    string memory sourceCode,
+    uint64 subscriptionId,
+    uint32 fulfillGasLimit,
+    uint256 _mintInterval,
+    uint256 _mintBatchSize
+  ) ERC1155IPFS() FunctionsWrapper(oracle, sourceCode, subscriptionId, fulfillGasLimit) {
+    mintInterval = _mintInterval;
+    mintBatchSize = _mintBatchSize;
+    // lastUpkeepTimeStamp = block.timestamp; //uneeded until batch processing implemented  
 
-  /**
-   * @notice Generates a new Functions.Request. This pure function allows the request CBOR to be generated off-chain, saving gas.
-   *
-   * @param source JavaScript source code
-   * @param secrets Encrypted secrets payload
-   * @param args List of arguments accessible from within the source code
-   */
-  function generateRequest(
-    string calldata source,
-    bytes calldata secrets,
-    string[] calldata args
-  ) public pure returns (bytes memory) {
-    Functions.Request memory req;
-    req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, source);
-    if (secrets.length > 0) {
-      req.addRemoteSecrets(secrets);
-    }
-    if (args.length > 0) req.addArgs(args);
-
-    return req.encodeCBOR();
-  }
-
-  /**
-   * @notice Sets the bytes representing the CBOR-encoded Functions.Request that is sent when performUpkeep is called
-
-   * @param _subscriptionId The Functions billing subscription ID used to pay for Functions requests
-   * @param _fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
-   * @param _updateInterval Time interval at which Chainlink Automation should call performUpkeep
-   * @param newRequestCBOR Bytes representing the CBOR-encoded Functions.Request
-   */
-  function setRequest(
-    uint64 _subscriptionId,
-    uint32 _fulfillGasLimit,
-    uint256 _updateInterval,
-    bytes calldata newRequestCBOR
-  ) external onlyOwner {
-    updateInterval = _updateInterval;
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    requestCBOR = newRequestCBOR;
+    mintingQueue.initiate();
   }
 
   /**
@@ -96,7 +50,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsClient, ConfirmedOwner, Automat
    * second element contains custom bytes data which is passed to performUpkeep when it is called by Automation.
    */
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
-    upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
+    upkeepNeeded = false;
+    if (mintingQueue.state == CIDProcessorQueue.State.IDLE) {
+      upkeepNeeded = mintingQueue.tickets.curr_ticket < mintingQueue.tickets.num_tickets;
+    } else if (gotFunctionResponse()) {
+      upkeepNeeded = true;
+    } 
+    return (upkeepNeeded, ""); //not needed for returning, but we might use the bytes data retun later
   }
 
   /**
@@ -107,38 +67,34 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsClient, ConfirmedOwner, Automat
    */
   function performUpkeep(bytes calldata) external override {
     (bool upkeepNeeded, ) = checkUpkeep("");
-    require(upkeepNeeded, "Time interval not met");
-    lastUpkeepTimeStamp = block.timestamp;
-    upkeepCounter = upkeepCounter + 1;
+    require(upkeepNeeded, "upkeep not needed");
+    // lastUpkeepTimeStamp = block.timestamp; //uneeded until batch processing implemented
 
-    bytes32 requestId = s_oracle.sendRequest(subscriptionId, requestCBOR, fulfillGasLimit);
-
-    s_pendingRequests[requestId] = s_oracle.getRegistry();
-    emit RequestSent(requestId);
-    latestRequestId = requestId;
+    if (mintingQueue.state == CIDProcessorQueue.State.IDLE){
+      submit();
+    }else {
+      issue();
+    }
+    mintingQueue.update_state();
   }
 
-  /**
-   * @notice Callback that is invoked once the DON has resolved the request or hit an error
-   *
-   * @param requestId The request ID, returned by sendRequest()
-   * @param response Aggregated response from the user code
-   * @param err Aggregated error from the user code or from the execution pipeline
-   * Either response or error parameter will be set, but never both
-   */
-  function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-    latestResponse = response;
-    latestError = err;
-    responseCounter = responseCounter + 1;
-    emit OCRResponse(requestId, response, err);
+    //sends mint request off to Chainlink Functions to be verified 
+  function submit() internal {
+    mintingQueue.build_batch();
+    executeRequest("", mintingQueue.submissionBatch); //secrets unused for now
   }
 
-  /**
-   * @notice Allows the Functions oracle address to be updated
-   *
-   * @param oracle New oracle address
-   */
-  function updateOracleAddress(address oracle) public onlyOwner {
-    setOracle(oracle);
+    //mints valid NFTs
+  function issue() internal {
+    require (latestResponse.length == mintingQueue.submissionBatch.length);
+    for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
+        //TODO: update for batch processing
+      if(latestResponse[i] == "1"){
+        mintToken(mintingQueue.pull_ticket_owner(), mintingQueue.pull_ticket_data(), 1);
+        mintingQueue.ticket_approved();
+      } else {
+        mintingQueue.ticket_rejected();
+      }
+    }
   }
 }
