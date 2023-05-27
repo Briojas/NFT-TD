@@ -8,7 +8,7 @@ import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     using Functions for Functions.Request;
 
-    bytes public requestCBOR;
+    string public sourceCode;
     bytes32 public latestRequestId;
     bytes public latestResponse;
     bytes public latestError;
@@ -19,58 +19,34 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
 
     constructor(
         address oracle,
+        string memory _sourceCode,
         uint64 _subscriptionId,
         uint32 _fulfillGasLimit
     ) FunctionsClient(oracle) ConfirmedOwner(msg.sender) {
+        sourceCode = _sourceCode;
         subscriptionId = _subscriptionId;
         fulfillGasLimit = _fulfillGasLimit;
+        latestResponse = "";
+        latestError = "";
     }
 
     /**
    * @notice Generates a new Functions.Request. This pure function allows the request CBOR to be generated off-chain, saving gas.
    *
-   * @param source JavaScript source code
    * @param secrets Encrypted secrets payload
    * @param args List of arguments accessible from within the source code
    */
-    function generateRequest(
-        string calldata source,
-        bytes calldata secrets,
-        string[] calldata args
-    ) public pure returns (bytes memory) {
+    function executeRequest(
+        bytes memory secrets,
+        string[] memory args
+    ) internal {
         Functions.Request memory req;
-        req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, source);
+        req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, sourceCode);
         if (secrets.length > 0) req.addRemoteSecrets(secrets);
         if (args.length > 0) req.addArgs(args);
-        return req.encodeCBOR();
-    }
-
-    /**
-    * @notice Sets the bytes representing the CBOR-encoded Functions.Request that is sent when performUpkeep is called
-
-    * @param _subscriptionId The Functions billing subscription ID used to pay for Functions requests
-    * @param _fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
-    * @param newRequestCBOR Bytes representing the CBOR-encoded Functions.Request
-    */
-    function setRequest(
-        uint64 _subscriptionId,
-        uint32 _fulfillGasLimit,
-        bytes calldata newRequestCBOR
-    ) external onlyOwner {
-        subscriptionId = _subscriptionId;
-        fulfillGasLimit = _fulfillGasLimit;
-        requestCBOR = newRequestCBOR;
-    }
-
-    /**
-    * @notice Called by performUpkeep to make the Functions sendRequest call
-    */
-    function callRequest() private {
-        bytes32 requestId = s_oracle.sendRequest(subscriptionId, requestCBOR, fulfillGasLimit);
-
-        s_pendingRequests[requestId] = s_oracle.getRegistry();
-        emit RequestSent(requestId);
-        latestRequestId = requestId;
+        
+        bytes32 assignedReqID = sendRequest(req, subscriptionId, fulfillGasLimit);
+        latestRequestId = assignedReqID;
     }
 
     /**
@@ -90,9 +66,22 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     /**
     * @notice Allows the Functions oracle address to be updated
     *
+    * @param _sourceCode New source code
+    */
+    function updateSourceCode(string memory _sourceCode) public onlyOwner {
+         sourceCode = _sourceCode;
+    }
+
+    /**
+    * @notice Allows the Functions oracle address to be updated
+    *
     * @param oracle New oracle address
     */
     function updateOracleAddress(address oracle) public onlyOwner {
         setOracle(oracle);  
+    }
+
+    function gotFunctionResponse() public view returns (bool) {
+        return latestResponse.length != latestError.length;
     }
 }
