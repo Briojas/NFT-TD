@@ -26,7 +26,7 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    * @param _mintInterval Time interval at which Chainlink Automation should call performUpkeep
    */
   constructor(
-    address oracle,
+    address oracle, //Sepolia Functions Oracle address: "0x649a2C205BE7A3d5e99206CEEFF30c794f0E31EC"
     string memory sourceCode,
     uint64 subscriptionId,
     uint32 fulfillGasLimit,
