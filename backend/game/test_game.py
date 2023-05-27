@@ -60,7 +60,9 @@ def test_multiplicative_behavior_initialization(
     priority=st.integers(min_value=1, max_value=7)
 )
 def test_card_initialization(tier, priority):
-    """Tests card with an additive operator (+/-)
+    """Test card initialization
+
+    Future development to add behavior
 
     Requirements:
     - Additive card has three attributes:
