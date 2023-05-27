@@ -64,7 +64,7 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     }
 
     /**
-    * @notice Allows the Functions oracle address to be updated
+    * @notice Allows the Functions request source code to be updated
     *
     * @param _sourceCode New source code
     */
@@ -79,6 +79,15 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     */
     function updateOracleAddress(address oracle) public onlyOwner {
         setOracle(oracle);  
+    }
+
+    /**
+    * @notice Allows the Functions subscription ID to be updated
+    *
+    * @param _subscriptionID New Subscription ID created
+    */
+    function updateSubscriptionID(uint64 _subscriptionID) public onlyOwner {
+        subscriptionId = _subscriptionID;
     }
 
     function gotFunctionResponse() public view returns (bool) {
