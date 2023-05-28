@@ -43,15 +43,21 @@ library CIDProcessorQueue {
         self.state = State(0);
     }
 
-    function join(Queue storage self, string calldata ipfs_url) internal{
+    function join(Queue storage self, address user, string calldata ipfs_url) internal{
         uint key = self.tickets.next_submission_key;
         self.tickets.num_tickets ++;
             //submission details
+        self.data[key].user = user;
         self.data[key].ticket = self.tickets.num_tickets;
+        handle_existing_key(self, key);
         self.data[key].ipfs_url = ipfs_url;
         self.data[key].result = Result(0);
-
-        handle_existing_key(self, key);
+        emit ticket_assigned(
+            self.data[key].user, 
+            self.data[key].ticket, 
+            self.data[key].key_index, 
+            self.data[key].ipfs_url
+        );
         set_next_sub_key(self);
     }
 
@@ -164,6 +170,6 @@ library CIDProcessorQueue {
         address user,
         uint ticket,
         uint ticket_key,
-        string cid
+        string ipfs_url
     );
 }

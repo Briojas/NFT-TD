@@ -74,8 +74,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
       submit();
     }else {
       issue();
+      resetFunctionResponse();
     }
     mintingQueue.update_state();
+  }
+
+  function joinQueue(address user, string calldata ipfsURL) public{
+    mintingQueue.join(user, ipfsURL);
   }
 
     //sends mint request off to Chainlink Functions to be verified 
