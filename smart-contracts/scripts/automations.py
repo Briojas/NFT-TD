@@ -6,7 +6,7 @@ def automations():
     account = get_account()
 
     contract = PrimeCrusaders[-1]
-    print('Latest address: ' + contract.address)
+    print('Working address: ' + contract.address)
 
     upkeep = contract.checkUpkeep.call(b'',{"from": account})
     print('Needs Upkeep? ' + str(upkeep[0]))

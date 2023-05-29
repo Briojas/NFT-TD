@@ -79,8 +79,8 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     mintingQueue.update_state();
   }
 
-  function joinQueue(address user, string calldata ipfsURL) public{
-    mintingQueue.join(user, ipfsURL);
+  function joinQueue(string calldata ipfsURL) public{
+    mintingQueue.join(address(msg.sender), ipfsURL);
   }
 
     //sends mint request off to Chainlink Functions to be verified 
@@ -92,10 +92,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     //mints valid NFTs
   function issue() internal {
     require (latestResponse.length == mintingQueue.submissionBatch.length);
+    address user;
+    string memory ipfs_url;
     for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
         //TODO: update for batch processing
+      (user, ipfs_url, ) = mintingQueue.current_ticket();
       if(latestResponse[i] == "1"){
-        mintToken(mintingQueue.pull_ticket_owner(), mintingQueue.pull_ticket_data(), 1);
+        mintToken(user, ipfs_url, 1);
         mintingQueue.ticket_approved();
       } else {
         mintingQueue.ticket_rejected();
@@ -103,14 +106,12 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     }
   }
 
-  function status() public view returns (CIDProcessorQueue.State, uint256, uint256, address, string memory, CIDProcessorQueue.Result) {
-    return (
-      mintingQueue.state,
-      mintingQueue.tickets.num_tickets,
-      mintingQueue.tickets.curr_ticket,
-      mintingQueue.pull_ticket_owner(),
-      mintingQueue.pull_ticket_data(),
-      mintingQueue.pull_ticket_result()
-    );
+  function status() public view returns (CIDProcessorQueue.State state, uint256 num_tickets, uint256 curr_ticket, address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
+    state = mintingQueue.state;
+    num_tickets = mintingQueue.tickets.num_tickets;
+    curr_ticket = mintingQueue.tickets.curr_ticket;
+    (user, ipfs_url, result) = mintingQueue.current_ticket();
   }
+
+  //TODO: add resetting function
 }
