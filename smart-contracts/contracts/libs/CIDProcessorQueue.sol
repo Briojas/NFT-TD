@@ -48,12 +48,10 @@ library CIDProcessorQueue {
     function build_batch(Queue storage self) internal {
         self.submissionBatch = new string[](0); //Chainlink Functions Request.args requires String[]
         set_sub_status(self, Result.PENDING);
-
             //TODO: implement multi-submission batching
         string memory ipfs_url;
         (,ipfs_url,)= current_ticket(self);
         self.submissionBatch.push(ipfs_url);
-
     }
 
     function ticket_approved(Queue storage self, bool approve) internal {

@@ -12,6 +12,7 @@ def automations():
     print('Needs Upkeep? ' + str(upkeep[0]))
     if upkeep[0] == True:
         print('Performing Upkeep...')
+        # print('Gas estimated: ' + contract.performUpkeep.estimate_gas(b'', {"from": account}))
         contract.performUpkeep.call(b'', {"from": account})
         print('Upkeep performed.')
 

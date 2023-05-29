@@ -16,12 +16,7 @@ def submit():
     for submission in data:
         print ('Submission: ' + submission)
         print('address: ' + account.address)
-        # gas_cost = contract.joinQueue.estimate_gas(account.address, submission, {"from": account})
-        # print('gas cost: ' + str(gas_cost))
         contract.joinQueue(submission, {"from": account})
-        submission_event = Contract(contract.address).events.ticket_assigned.get()[-1]
-        print(submission_event.name)
-        print(submission_event.data)
 
 def main():
     submit()

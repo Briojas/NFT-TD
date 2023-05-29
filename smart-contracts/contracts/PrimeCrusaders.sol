@@ -117,11 +117,14 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     (user, ipfs_url, result) = mintingQueue.view_ticket(ticket_no);
   }
 
-  function functions_status() public view returns (bytes32, bytes memory, bytes memory) {
+  function functions_status() public view returns (bytes32, bytes memory, bytes memory, string[] memory, uint256) {
+    uint nextSubGasCost = GetGas("", mintingQueue.submissionBatch);
     return (
       latestRequestId, 
       latestResponse, 
-      latestError
+      latestError,
+      mintingQueue.submissionBatch,
+      nextSubGasCost
     );
   }
 

@@ -30,7 +30,7 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     }
 
     /**
-   * @notice Generates a new Functions.Request. This pure function allows the request CBOR to be generated off-chain, saving gas.
+   * @notice Generates a new Functions.Request.
    *
    * @param secrets Encrypted secrets payload
    * @param args List of arguments accessible from within the source code
@@ -47,6 +47,24 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
         bytes32 assignedReqID = sendRequest(req, subscriptionId, fulfillGasLimit);
         latestRequestId = assignedReqID;
     }
+
+    /**
+   * @notice Estimates the gas cost of a new Functions.Request. 
+   *
+   * @param secrets Encrypted secrets payload
+   * @param args List of arguments accessible from within the source code
+   */
+    function GetGas(
+        bytes memory secrets,
+        string[] memory args
+    ) internal view returns (uint256){
+        Functions.Request memory req;
+        req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, sourceCode);
+        if (secrets.length > 0) req.addRemoteSecrets(secrets);
+        if (args.length > 0) req.addArgs(args);
+        
+        return estimateCost(req, subscriptionId, fulfillGasLimit, 1);
+  }
 
     /**
     * @notice Callback that is invoked once the DON has resolved the request or hit an error

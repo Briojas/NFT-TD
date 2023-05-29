@@ -34,6 +34,8 @@ def checkStatus():
     print('Last Request Id: ' + str(funcStatus[0]))
     print('Last Response: ' + str(funcStatus[1]))
     print('Last Error: ' + str(funcStatus[2]))
+    print('Last Batch: ' + str(funcStatus[3]))
+    print('Gas Estimated: ' + str(funcStatus[4]))
     print('')
 
 def main():
