@@ -12,9 +12,10 @@ def checkStatus():
     print('Needs Upkeep? ' + str(upkeep[0]))
     print('')
     
-    queueStatus = contract.status.call({"from": account})
+    queueStatus = contract.queue_status.call({"from": account})
     print('----State----')
-    print(queueStatus[0])
+    status = ['IDLE', 'VERIFYING']
+    print(status[queueStatus[0]])
 
     print('----Tickets----')
     print('number of tickets: ' + str(queueStatus[1]))
@@ -24,20 +25,16 @@ def checkStatus():
     print('----Current Submission----')
     print('ticket owner: ' + str(queueStatus[3]))
     print('ticket being processed: ' + str(queueStatus[4]))
-    status = ['IDLE', 'VERIFYING']
-    print('ticket status - ' + str(status[queueStatus[5]]))
+    state = ['QUEUED', 'PENDING', 'APPROVED', 'REJECTED']
+    print('ticket state - ' + str(state[queueStatus[5]]))
     print('')
 
-    # print('----Next Script----')
-    # next_ticket_key = str(queue[0][3])
-    # print('next ticket: ' + next_ticket_key)
-    # next_script = contract.submission_data.call(ticket_key, {"from": account})
-    # print('script owner: ' + next_script[0])
-    # print('script to be processed: ' + next_script[2])
-    # print('')
-
-    # print('----Queue State----')
-    # print(states[queue[1]])
+    print('----Functions Results----')
+    funcStatus = contract.functions_status.call({"from": account})
+    print('Last Request Id: ' + str(funcStatus[0]))
+    print('Last Response: ' + str(funcStatus[1]))
+    print('Last Error: ' + str(funcStatus[2]))
+    print('')
 
 def main():
     checkStatus()

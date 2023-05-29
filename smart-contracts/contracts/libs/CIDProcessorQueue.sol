@@ -14,7 +14,7 @@ library CIDProcessorQueue {
 
     struct Tickets {
         uint num_tickets;
-        uint curr_ticket;
+        uint curr_ticket_no;
     }
 
     struct Queue { 
@@ -25,13 +25,12 @@ library CIDProcessorQueue {
     }
 
     function initiate(Queue storage self) internal {
-        self.tickets.num_tickets = 0; //will increment to 1 after first Submission
-        self.tickets.curr_ticket = 0; //first ticket submitted will be ticket 1
+        self.tickets.num_tickets = 0; //num tickets will always show 1 more than acutal, since it's also used to assign ticket numbers
+        self.tickets.curr_ticket_no = 0;
         self.state = State(0);
     }
 
     function join(Queue storage self, address user, string calldata ipfs_url) internal{
-        self.tickets.num_tickets ++;
         uint key = self.tickets.num_tickets;
             //submission details
         self.data[key].user = user;
@@ -43,6 +42,7 @@ library CIDProcessorQueue {
             self.data[key].ticket, 
             self.data[key].ipfs_url
         );
+        self.tickets.num_tickets ++;
     }
 
     function build_batch(Queue storage self) internal {
@@ -53,21 +53,31 @@ library CIDProcessorQueue {
         string memory ipfs_url;
         (,ipfs_url,)= current_ticket(self);
         self.submissionBatch.push(ipfs_url);
+
     }
 
-    function ticket_approved(Queue storage self) internal {
-        set_sub_status(self, Result.APPROVED);
-    }
-
-    function ticket_rejected(Queue storage self) internal {
-        set_sub_status(self, Result.REJECTED);
+    function ticket_approved(Queue storage self, bool approve) internal {
+        if(approve){
+            set_sub_status(self, Result.APPROVED);
+        }else{
+            set_sub_status(self, Result.REJECTED);
+        }
+        self.tickets.curr_ticket_no ++;
     }
 
     function current_ticket(Queue storage self) internal view returns (address, string memory, Result) {
         return (
-            self.data[self.tickets.curr_ticket].user,
-            self.data[self.tickets.curr_ticket].ipfs_url,
-            self.data[self.tickets.curr_ticket].result
+            self.data[self.tickets.curr_ticket_no].user,
+            self.data[self.tickets.curr_ticket_no].ipfs_url,
+            self.data[self.tickets.curr_ticket_no].result
+        );
+    }
+
+    function view_ticket(Queue storage self, uint ticket) internal view returns (address, string memory, Result) {
+        return (
+            self.data[ticket].user,
+            self.data[ticket].ipfs_url,
+            self.data[ticket].result
         );
     }
 
@@ -80,7 +90,7 @@ library CIDProcessorQueue {
     }
 
     function set_sub_status(Queue storage self, Result result) internal {
-        self.data[self.tickets.curr_ticket].result = result;
+        self.data[self.tickets.curr_ticket_no].result = result;
     }
 
     event ticket_assigned(

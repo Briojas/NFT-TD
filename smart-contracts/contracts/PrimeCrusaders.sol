@@ -52,7 +52,7 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
     upkeepNeeded = false;
     if (mintingQueue.state == CIDProcessorQueue.State.IDLE) {
-      upkeepNeeded = mintingQueue.tickets.curr_ticket < mintingQueue.tickets.num_tickets;
+      upkeepNeeded = mintingQueue.tickets.curr_ticket_no < mintingQueue.tickets.num_tickets;
     } else if (gotFunctionResponse()) {
       upkeepNeeded = true;
     } 
@@ -80,7 +80,7 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   }
 
   function joinQueue(string calldata ipfsURL) public{
-    mintingQueue.join(address(msg.sender), ipfsURL);
+    mintingQueue.join(msg.sender, ipfsURL);
   }
 
     //sends mint request off to Chainlink Functions to be verified 
@@ -99,18 +99,30 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
       (user, ipfs_url, ) = mintingQueue.current_ticket();
       if(latestResponse[i] == "1"){
         mintToken(user, ipfs_url, 1);
-        mintingQueue.ticket_approved();
+        mintingQueue.ticket_approved(true);
       } else {
-        mintingQueue.ticket_rejected();
+        mintingQueue.ticket_approved(false);
       }
     }
   }
 
-  function status() public view returns (CIDProcessorQueue.State state, uint256 num_tickets, uint256 curr_ticket, address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
+  function queue_status() public view returns (CIDProcessorQueue.State state, uint256 num_tickets, uint256 curr_ticket_no, address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
     state = mintingQueue.state;
     num_tickets = mintingQueue.tickets.num_tickets;
-    curr_ticket = mintingQueue.tickets.curr_ticket;
+    curr_ticket_no = mintingQueue.tickets.curr_ticket_no;
     (user, ipfs_url, result) = mintingQueue.current_ticket();
+  }
+
+  function ticket_status(uint256 ticket_no) public view returns (address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
+    (user, ipfs_url, result) = mintingQueue.view_ticket(ticket_no);
+  }
+
+  function functions_status() public view returns (bytes32, bytes memory, bytes memory) {
+    return (
+      latestRequestId, 
+      latestResponse, 
+      latestError
+    );
   }
 
   //TODO: add resetting function
