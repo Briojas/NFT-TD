@@ -143,3 +143,17 @@ def test_tower_upgrade_within_limit_success():
     max_tier = max(models.Tower.allowable_values["tier"])
     tower.tier = max_tier
     assert tower.tier == max_tier
+
+
+def test_tower_level_up_below_max_level_success():
+    max_tier = max(models.Tower.allowable_values["tier"])
+    tower = models.Tower(id=1, cards={}, tier=max_tier - 1)
+    tower.level_up()
+    assert tower.tier == max_tier
+
+
+def test_tower_level_up_at_max_level_failure():
+    max_tier = max(models.Tower.allowable_values["tier"])
+    tower = models.Tower(id=1, cards={}, tier=max_tier)
+    with pytest.raises(ValueError):
+        tower.level_up()
