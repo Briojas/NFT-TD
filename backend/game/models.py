@@ -15,8 +15,6 @@ def _validate_inputs_setter(func):
     def wrapper(self, value):
         param_name = func.__name__
         allowed_values = self.allowable_values.get(param_name, None)
-        if allowed_values is None:
-            raise Exception(f"No allowable values defined for parameter {param_name}")
         if value not in allowed_values:
             raise ValueError(f"The input value for {param_name} is not valid.")
         return func(self, value)
@@ -131,7 +129,7 @@ class Tower:
             raise TooManyCardsError
 
         self.id = id
-        # Ensure stored cards are sorted by priority
+        # Ensure stored cards are sorted
         self._cards = {k: v for k, v in sorted(cards.items())}
         self._tier = tier
 
@@ -148,6 +146,7 @@ class Tower:
     def cards(self, cards):
         if len(cards) > self.tier:
             raise TooManyCardsError
+        # Ensure stored cards are sorted
         self._cards = {k: v for k, v in sorted(cards.items())}
 
     @property

@@ -157,3 +157,24 @@ def test_tower_level_up_at_max_level_failure():
     tower = models.Tower(id=1, cards={}, tier=max_tier)
     with pytest.raises(ValueError):
         tower.level_up()
+
+
+def test_tower_cards_cannot_exceed_tier_at_initialization():
+    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
+    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
+    with pytest.raises(models.TooManyCardsError):
+        models.Tower(id=1, cards={1: card1, 2: card2}, tier=1)
+
+def test_tower_cards_cannot_exceed_tier_at_card_setter():
+    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
+    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
+    tower = models.Tower(id=1, cards={1: card1}, tier=1)
+    with pytest.raises(models.TooManyCardsError):
+        tower.cards = {1: card1, 2: card2}
+
+def test_tower_cards_can_be_set_if_below_tier_limit():
+    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
+    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
+    tower = models.Tower(id=1, cards={1: card1}, tier=2)
+    tower.cards = {1: card1, 2: card2}
+    assert tower.cards == {1: card1, 2: card2}
