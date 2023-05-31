@@ -123,3 +123,9 @@ def test_tower_with_same_cards_in_different_order_are_not_equal():
 def test_tower_is_not_equal_to_non_tower_object():
     tower = models.Tower(id=1, cards={})
     assert not tower == 1
+
+
+def test_op_tower_fails_on_upgrade():
+    # with pytest.raises(ValueError):
+    tower = models.Tower(id=1, cards={}, tier=1)
+    tower.tier = 100

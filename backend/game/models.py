@@ -4,11 +4,25 @@
 
 from django.db import models
 from typing import get_type_hints
+import functools
 import inspect
+import itertools
 
 
 def _inclusive_range(start: int, stop: int):
     return range(start, stop + 1)
+
+
+def _validate_inputs_setter(func):
+    def wrapper(self, value):
+        param_name = func.__name__
+        allowed_values = self.allowable_values.get(param_name, None)
+        if allowed_values is None:
+            raise Exception(f"No allowable values defined for parameter {param_name}")
+        if value not in allowed_values:
+            raise ValueError(f"The input value for {param_name} is not valid.")
+        return func(self, value)
+    return wrapper
 
 
 def _validate_inputs(func):
@@ -109,7 +123,7 @@ class Tower:
         """
         self.id = id
         # Ensure stored cards are sorted by priority
-        self.cards = {k: v for k, v in sorted(cards.items())}
+        self._cards = {k: v for k, v in itertools.islice(sorted(cards.items()), tier)}
         self._tier = tier
 
     def __eq__(self, other):
@@ -118,5 +132,22 @@ class Tower:
         return False  # pragma: no cover
 
     @property
+    def cards(self):
+        return self._cards
+
+    @cards.setter
+    def cards(self, cards):
+        self._cards = {k: v for k, v in itertools.islice(sorted(cards.items()), self.tier)}
+
+    @property
     def tier(self):
         return self._tier
+
+    @tier.setter
+    @_validate_inputs_setter
+    def tier(self, tier):
+        self._tier = tier
+
+    def level_up(self):
+        self.tier += 1
+        # At this point, a card may be added to the tower
