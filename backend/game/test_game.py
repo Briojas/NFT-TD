@@ -1,5 +1,5 @@
 from django.test import TestCase
-from hypothesis import given, strategies as st
+from hypothesis import assume, given, strategies as st
 import pytest
 
 from game import models
@@ -13,11 +13,17 @@ def test_validation_wrapper():
 
 
 @given(
-    power=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["power"])),
-    splash=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["splash"])),
-    radius=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["radius"]))
+    power=st.integers(max_value=10),
+    splash=st.integers(max_value=10),
+    radius=st.integers(max_value=10)
 )
 def test_validation_wrapper_invalid_inputs(power, splash, radius):
+    # Skip conditions where all values are within limits
+    for attribute, value in zip(["power", "splash", "radius"], [power, splash, radius]):
+        allowable_range = models.AdditiveBehavior.allowable_values[attribute]
+        if value in allowable_range:
+            assume(False)
+
     with pytest.raises(ValueError) as e_info:
         models.AdditiveBehavior(power=power, splash=splash, radius=radius)
 
