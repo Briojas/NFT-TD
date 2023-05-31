@@ -125,12 +125,21 @@ def test_tower_is_not_equal_to_non_tower_object():
     assert not tower == 1
 
 
-def test_op_tower_fails_on_creation():
+def test_tower_initialization_beyond_tier_limit_failure():
+    max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
-        tower = models.Tower(id=1, cards={}, tier=10)
+        tower = models.Tower(id=1, cards={}, tier= max_tier + 1)
 
 
-def test_op_tower_fails_on_upgrade():
+def test_tower_upgrade_beyond_tier_limit_failure():
     tower = models.Tower(id=1, cards={}, tier=1)
+    max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
-        tower.tier = 10
+        tower.tier = max_tier + 1
+
+
+def test_tower_upgrade_within_limit_success():
+    tower = models.Tower(id=1, cards={}, tier=1)
+    max_tier = max(models.Tower.allowable_values["tier"])
+    tower.tier = max_tier
+    assert tower.tier == max_tier
