@@ -125,7 +125,12 @@ def test_tower_is_not_equal_to_non_tower_object():
     assert not tower == 1
 
 
+def test_op_tower_fails_on_creation():
+    with pytest.raises(ValueError):
+        tower = models.Tower(id=1, cards={}, tier=10)
+
+
 def test_op_tower_fails_on_upgrade():
-    # with pytest.raises(ValueError):
     tower = models.Tower(id=1, cards={}, tier=1)
-    tower.tier = 100
+    with pytest.raises(ValueError):
+        tower.tier = 10
