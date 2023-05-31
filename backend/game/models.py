@@ -4,6 +4,7 @@
 
 from django.db import models
 from typing import get_type_hints
+import inspect
 
 
 def _inclusive_range(start: int, stop: int):
@@ -11,13 +12,26 @@ def _inclusive_range(start: int, stop: int):
 
 
 def _validate_inputs(func):
-    def wrapper(self, **kwargs):
+    sig = inspect.signature(func)
+
+    def wrapper(self, *args, **kwargs):
+        # bind the function arguments to their names
+        bound_args = sig.bind(self, *args, **kwargs)
+        bound_args.apply_defaults()
+
         errors = []
         type_hints = get_type_hints(func)
 
-        for attribute, allowable_range in self.allowable_values.items():
-            value = kwargs.get(attribute)
+        for attribute, value in bound_args.arguments.items():
+            if attribute == "self":
+                continue
+
+            allowable_range = self.allowable_values.get(attribute)
             expected_type = type_hints.get(attribute)
+
+            if allowable_range is None or expected_type is None:
+                continue
+
             if not isinstance(value, expected_type) or value not in allowable_range:
                 min_allowable = min(allowable_range)
                 max_allowable = max(allowable_range)
@@ -28,7 +42,7 @@ def _validate_inputs(func):
         if errors:
             raise ValueError('Invalid input(s):\n' + '\n'.join(errors))
 
-        return func(self, **kwargs)
+        return func(self, *args, **kwargs)
 
     return wrapper
 
@@ -72,12 +86,37 @@ class MultiplicativeBehavior:
 
 
 class Tower:
-    def __init__(self, id: int, cards: dict):
+    allowable_values = {
+        'tier': _inclusive_range(1, 3)
+    }
+
+    @_validate_inputs
+    def __init__(self, id: int, cards: dict, tier: int=1):
+        """Initialize a Tower instance
+
+        Args:
+            id (int): _description_
+            cards (dict): A dictionary of the towers behavior cards.
+              The number of cards allowed corresponds to the tier of the tower.
+              The order of the dictionary prioritizes the logical firing order
+              for the behaviors.
+
+              Ex: cards = {
+                   1: card1,  # This card will be the first to be applied
+                   2: card2   # This card will be the second to be applied
+              }
+            tier (int, optional): The "level" of the tower. Defaults to 1. Max 3.
+        """
         self.id = id
         # Ensure stored cards are sorted by priority
         self.cards = {k: v for k, v in sorted(cards.items())}
+        self._tier = tier
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.cards == other.cards
         return False  # pragma: no cover
+
+    @property
+    def tier(self):
+        return self._tier

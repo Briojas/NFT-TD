@@ -65,6 +65,7 @@ def test_tower_initialization(id, cards):
     tower = models.Tower(id=id, cards=cards)
     assert tower.id == id
     assert tower.cards == cards
+    assert tower.tier == 1  # Default value
 
 
 @pytest.mark.parametrize("power,splash,radius", [(1, 3, 4), (2, 2, 2), (3, 1, 1)])
