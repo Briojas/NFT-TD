@@ -107,16 +107,16 @@ def test_behaviors_of_differing_types_are_not_equal():
 def test_tower_with_same_cards_in_same_order_are_equal():
     card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
     card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(id=1, cards={1: card1, 2: card2})
-    tower2 = models.Tower(id=1, cards={1: card1, 2: card2})
+    tower1 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
+    tower2 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
     assert tower1 == tower2
 
 
 def test_tower_with_same_cards_in_different_order_are_not_equal():
     card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
     card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(id=1, cards={1: card1, 2: card2})
-    tower2 = models.Tower(id=1, cards={1: card2, 2: card1})
+    tower1 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
+    tower2 = models.Tower(id=1, cards={1: card2, 2: card1}, tier=2)
     assert not tower1 == tower2
 
 

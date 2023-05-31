@@ -4,9 +4,7 @@
 
 from django.db import models
 from typing import get_type_hints
-import functools
 import inspect
-import itertools
 
 
 def _inclusive_range(start: int, stop: int):
@@ -59,6 +57,14 @@ def _validate_inputs(func):
         return func(self, *args, **kwargs)
 
     return wrapper
+
+
+class TooManyCardsError(ValueError):
+    def __init__(self, message=None, extra_info=None):
+        if message is None:
+            message = "The number of cards may not exceed the tower's tier"
+        super().__init__(message)
+        self.extra_info = extra_info
 
 
 class AdditiveBehavior:
@@ -121,9 +127,12 @@ class Tower:
               }
             tier (int, optional): The "level" of the tower. Defaults to 1. Max 3.
         """
+        if len(cards) > tier:
+            raise TooManyCardsError
+
         self.id = id
         # Ensure stored cards are sorted by priority
-        self._cards = {k: v for k, v in itertools.islice(sorted(cards.items()), tier)}
+        self._cards = {k: v for k, v in sorted(cards.items())}
         self._tier = tier
 
     def __eq__(self, other):
@@ -137,7 +146,9 @@ class Tower:
 
     @cards.setter
     def cards(self, cards):
-        self._cards = {k: v for k, v in itertools.islice(sorted(cards.items()), self.tier)}
+        if len(cards) > self.tier:
+            raise TooManyCardsError
+        self._cards = {k: v for k, v in sorted(cards.items())}
 
     @property
     def tier(self):
