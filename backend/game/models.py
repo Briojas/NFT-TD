@@ -46,6 +46,13 @@ class AdditiveBehavior:
         self.splash = splash
         self.radius = radius
 
+    def __hash__(self):
+        return hash(tuple(sorted(vars(self).items())))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return vars(self) == vars(other)
+        return False
 
 class MultiplicativeBehavior:
     allowable_values = {
@@ -60,15 +67,17 @@ class MultiplicativeBehavior:
         self.range = range
         self.rate = rate
 
+    def __hash__(self):
+        return hash((self.power, self.range, self.rate))
 
-class Card:
-    allowable_values = {
-        'tier': _inclusive_range(1, 3),
-        'priority':  _inclusive_range(1, 7)
-    }
 
-    @_validate_inputs
-    def __init__(self, tier: int, priority: int, behavior=None):
-        self.tier = tier
-        self.priority = priority
-        self.behavior = behavior
+class Tower:
+    def __init__(self, id: int, cards: dict):
+        self.id = id
+        # Ensure stored cards are sorted by priority
+        self.cards = {k: v for k, v in sorted(cards.items())}
+
+    def __hash__(self):
+        # We create a tuple of tuples. Each inner tuple represents a card, with its priority and hash
+        cards_hash = tuple((priority, hash(card)) for priority, card in self.cards.items())
+        return hash(cards_hash)

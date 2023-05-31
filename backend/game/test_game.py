@@ -6,18 +6,23 @@ from game import models
 
 
 def test_validation_wrapper():
-    card = models.Card(tier=2, priority=5)
-    assert card.tier == 2
-    assert card.priority == 5
+    behavior = models.AdditiveBehavior(power=1, splash=5, radius=2)
+    assert behavior.power == 1
+    assert behavior.splash == 5
+    assert behavior.radius == 2
 
 
-@given(tier=st.integers(max_value=10), priority=st.integers(max_value=10))
-def test_validation_wrapper_invalid_inputs(tier, priority):
+@given(
+    power=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["power"])),
+    splash=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["splash"])),
+    radius=st.integers(max_value=max(models.AdditiveBehavior.allowable_values["radius"]))
+)
+def test_validation_wrapper_invalid_inputs(power, splash, radius):
     with pytest.raises(ValueError) as e_info:
-        models.Card(tier=tier, priority=priority)
+        models.AdditiveBehavior(power=power, splash=splash, radius=radius)
 
-    for attribute, value in zip(["tier", "priority"], [tier, priority]):
-        allowable_range = models.Card.allowable_values[attribute]
+    for attribute, value in zip(["power", "splash", "radius"], [power, splash, radius]):
+        allowable_range = models.AdditiveBehavior.allowable_values[attribute]
         if value not in allowable_range:
             error_msg = (
                 f"{attribute.capitalize()} must be an integer "
@@ -55,21 +60,10 @@ def test_multiplicative_behavior_initialization(
     assert behavior.rate == rate
 
 
-@given(
-    tier=st.integers(min_value=1, max_value=3),
-    priority=st.integers(min_value=1, max_value=7)
-)
-def test_card_initialization(tier, priority):
-    """Test card initialization
+def test_tower_initialization():
+    tower = models.Tower(id=id, cards={})
+    assert tower.id == id
+    assert tower.cards == {}
 
-    Future development to add behavior
 
-    Requirements:
-    - Additive card has three attributes:
-       - tier (int): Value from 1 to 3
-       - priority (int): Value from 1 to 7
-       - behavior (Behavior): Custom class
-    """
-    card = models.Card(tier=tier, priority=priority, behavior=None)
-    assert card.tier == tier
-    assert card.priority == priority
+# def test_tower_with_same_cards_are_equal():
