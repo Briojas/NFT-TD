@@ -91,13 +91,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
 
     //mints valid NFTs
   function issue() internal {
-    require (latestResponse.length == mintingQueue.submissionBatch.length);
+    require (validFunctionResponse(mintingQueue.submissionBatch.length));
     address user;
     string memory ipfs_url;
     for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
         //TODO: update for batch processing
       (user, ipfs_url, ) = mintingQueue.current_ticket();
-      if(latestResponse[i] == "1"){
+      if(latestResponse[responseHeaderSize + i] == "1"){
         mintToken(user, ipfs_url, 1);
         mintingQueue.ticket_approved(true);
       } else {
@@ -117,16 +117,17 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     (user, ipfs_url, result) = mintingQueue.view_ticket(ticket_no);
   }
 
-  function functions_status() public view returns (bytes32, bytes memory, bytes memory, string[] memory, uint256) {
-    uint nextSubGasCost = GetGas("", mintingQueue.submissionBatch);
+  function functions_status() public view returns (bytes32, bytes memory, bytes memory, string[] memory) {
     return (
       latestRequestId, 
       latestResponse, 
       latestError,
-      mintingQueue.submissionBatch,
-      nextSubGasCost
+      mintingQueue.submissionBatch
     );
   }
 
+  function debug() public view returns (uint256, bool){
+    return (latestResponse.length, validFunctionResponse(mintingQueue.submissionBatch.length));
+  }
   //TODO: add resetting function
 }

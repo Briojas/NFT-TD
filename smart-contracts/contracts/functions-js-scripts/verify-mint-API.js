@@ -2,7 +2,8 @@
 
 // Arguments can be provided when a request is initated on-chain and used in the request source code as shown below
 const ipfs_url = args[0];
-const buffer = Buffer.from([0x01, 0x00, 0x01]);
+const results = "000-1";
+const buffer = Buffer.from(results, "utf-8");
 
 // To make an HTTP request, use the Functions.makeHttpRequest function
 // Functions.makeHttpRequest function parameters:

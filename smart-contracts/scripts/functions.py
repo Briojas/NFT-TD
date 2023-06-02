@@ -11,10 +11,11 @@ def functions():
     print('Working address: ' + contract.address)
 
     deployedSourceCode = contract.sourceCode.call({"from": account})
+    # with open('C:/HomoSimulo/NFT-TD/smart-contracts/contracts/functions-js-scripts/debug.js', 'r') as file:
     with open('C:/HomoSimulo/NFT-TD/smart-contracts/contracts/functions-js-scripts/verify-mint-API.js', 'r') as file:
         localSourceCode = file.read()
     deployedSubscriptionId = contract.subscriptionId.call({"from": account})
-    
+
     print('----CL Functions Info----')
     if localSourceCode == deployedSourceCode:
         print('Source code up to date.')

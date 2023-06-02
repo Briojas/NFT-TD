@@ -37,6 +37,7 @@ library CIDProcessorQueue {
         self.data[key].ticket = key;
         self.data[key].ipfs_url = ipfs_url;
         self.data[key].result = Result(0);
+        // self.submissionBatch.push(ipfs_url); //debugging
         emit ticket_assigned(
             self.data[key].user, 
             self.data[key].ticket, 
@@ -45,13 +46,10 @@ library CIDProcessorQueue {
         self.tickets.num_tickets ++;
     }
 
-    function build_batch(Queue storage self) internal {
+    function build_batch(Queue storage self) internal{
+        delete self.submissionBatch;
         self.submissionBatch = new string[](0); //Chainlink Functions Request.args requires String[]
-        set_sub_status(self, Result.PENDING);
-            //TODO: implement multi-submission batching
-        string memory ipfs_url;
-        (,ipfs_url,)= current_ticket(self);
-        self.submissionBatch.push(ipfs_url);
+        self.submissionBatch.push(self.data[self.tickets.curr_ticket_no].ipfs_url);
     }
 
     function ticket_approved(Queue storage self, bool approve) internal {
@@ -61,6 +59,12 @@ library CIDProcessorQueue {
             set_sub_status(self, Result.REJECTED);
         }
         self.tickets.curr_ticket_no ++;
+        
+        address user;
+        string memory ipfs_url;
+        Result result;
+        (user, ipfs_url, result) = current_ticket(self);
+        emit ticket_resolved(user, self.tickets.curr_ticket_no, ipfs_url, result);
     }
 
     function current_ticket(Queue storage self) internal view returns (address, string memory, Result) {
@@ -95,5 +99,12 @@ library CIDProcessorQueue {
         address user,
         uint ticket,
         string ipfs_url
+    );
+
+    event ticket_resolved(
+        address user,
+        uint ticket,
+        string ipfs_url,
+        Result result
     );
 }

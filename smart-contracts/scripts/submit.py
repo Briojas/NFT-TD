@@ -9,6 +9,7 @@ def submit():
     account = get_account()
 
     contract = PrimeCrusaders[-1]
+    # contract = Contract.from_abi("Au", address="0x370B3718B80A1c7B0c250402D595481E42f6CAd8", abi=PrimeCrusaders.abi)
     print('Working address: ' + contract.address)
 
     print('')

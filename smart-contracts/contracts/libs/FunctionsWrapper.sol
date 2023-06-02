@@ -12,6 +12,7 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     bytes32 public latestRequestId;
     bytes public latestResponse;
     bytes public latestError;
+    uint8 public responseHeaderSize = 4;
     uint64 public subscriptionId;
     uint32 public fulfillGasLimit;
 
@@ -49,24 +50,6 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     }
 
     /**
-   * @notice Estimates the gas cost of a new Functions.Request. 
-   *
-   * @param secrets Encrypted secrets payload
-   * @param args List of arguments accessible from within the source code
-   */
-    function GetGas(
-        bytes memory secrets,
-        string[] memory args
-    ) internal view returns (uint256){
-        Functions.Request memory req;
-        req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, sourceCode);
-        if (secrets.length > 0) req.addRemoteSecrets(secrets);
-        if (args.length > 0) req.addArgs(args);
-        
-        return estimateCost(req, subscriptionId, fulfillGasLimit, 1);
-  }
-
-    /**
     * @notice Callback that is invoked once the DON has resolved the request or hit an error
     *
     * @param requestId The request ID, returned by sendRequest()
@@ -82,6 +65,11 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
 
     function gotFunctionResponse() internal view returns (bool) {
         return latestResponse.length != latestError.length;
+    }
+
+    function validFunctionResponse(uint submissionSize) internal view returns (bool) {
+        require(latestResponse.length >= responseHeaderSize, "Invalid response length");
+        return (latestResponse.length - responseHeaderSize) == submissionSize;
     }
 
     function resetFunctionResponse() internal {
