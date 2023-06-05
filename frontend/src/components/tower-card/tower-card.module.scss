@@ -5,11 +5,10 @@
   background-color: #ffffff;
   border-radius: 0rem;
   overflow: hidden;
-  min-width: 100px;
-  padding: 0;
+  padding: 0px;
   border: 2px solid black;
-  max-width: 350px;
-  width: 125px;
+  width: 100px;
+  max-width: 100px;
 }
 
 .tower {
@@ -24,54 +23,69 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   box-shadow: none;
   margin-top: 0rem;
   padding: 0px;
-  height: 40px;
-  justify-items: center;
+  justify-items: stretch;
   flex-wrap: nowrap;
-  align-content: space-between;
-  width: 126px;
+  align-content: space-around;
+  height: 20px;
+  width: 101px;
 }
 
 .tier {
-  height: 25px;
   border-bottom: 2px solid black;
   border-right: 2px solid black;
-  align-self: center;
+  align-self: start;
   margin-top: 0px;
-  padding-top: 20px;
-  padding-left: 3px;
-  display: block;
-  font-size: 18px;
-  width: 45px;
+  display: flex;
+  font-size: 14px;
+  align-items: center;
+  align-content: center;
+  justify-content: start;
+  justify-items: center;
+  padding: 1px;
+  margin-right: 0px;
 }
 
 .operator {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 300;
   text-align: justify;
+  padding: 0px;
+  height: 20px;
 }
 
 .priority {
-  width: 45px;
-  height: 25px;
   border-bottom: 2px solid black;
   border-left: 2px solid black;
-  align-self: center;
-  margin-top: 0px;
-  padding-top: 20px;
-  padding-left: 3px;
-  font-size: 18px;
+  align-self: start;
+  font-size: 14px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  flex-direction: row;
+  margin: 0px;
+  padding: 1px;
 }
 
 .adjustor {
   background-color: #ffffff;
   border: 0px solid #000000;
+  width: 15px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  align-self: center;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 3px;
 }
 
-.power {
+.data {
   display: flex;
   flex-direction: row;
   font-size: 14px;
@@ -88,4 +102,17 @@
 }
 .data-value {
   width: 20px;
+}
+.card-data {
+  height: 140px;
+}
+.priority-operator-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: start;
+  justify-content: start;
+  padding: 3px 0px 0px;
+  height: 20px;
+  width: 8px;
 }
