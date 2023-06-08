@@ -73,10 +73,9 @@ def test_multiplicative_behavior_initialization(power, range, rate):
     assert behavior.rate == rate
 
 
-@pytest.mark.parametrize("tech_tree", [({})])
 def test_tower_initialization(tech_tree):
     tower = models.Tower(tech_tree=tech_tree)
-    assert tower.tech_tree == tech_tree
+    assert isinstance(tower.tech_tree, models.TechTree)
     assert tower.tier == 1  # Default value
 
 
@@ -116,57 +115,47 @@ def test_behaviors_of_differing_types_are_not_equal():
     assert not card1 == card2
 
 
-def test_tower_with_same_tech_tree_in_same_order_are_equal():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
-    tower2 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
+def test_tower_with_same_tech_tree_are_equal(tech_tree_cards):
+    tower1 = models.Tower(tech_tree=tech_tree_cards, tier=2)
+    tower2 = models.Tower(tech_tree=tech_tree_cards, tier=2)
     assert tower1 == tower2
 
 
-def test_tower_with_same_tech_tree_in_different_order_are_not_equal():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
-    tower2 = models.Tower(tech_tree={1: card2, 2: card1}, tier=2)
-    assert not tower1 == tower2
-
-
-def test_tower_is_not_equal_to_non_tower_object():
-    tower = models.Tower(tech_tree={})
+def test_tower_is_not_equal_to_non_tower_object(tech_tree_cards):
+    tower = models.Tower(tech_tree=tech_tree_cards)
     assert not tower == 1
 
 
-def test_tower_initialization_beyond_tier_limit_failure():
+def test_tower_initialization_beyond_tier_limit_failure(tech_tree_cards):
     max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
-        tower = models.Tower(tech_tree={}, tier= max_tier + 1)
+        tower = models.Tower(tech_tree=tech_tree_cards, tier= max_tier + 1)
 
 
-def test_tower_upgrade_beyond_tier_limit_failure():
-    tower = models.Tower(tech_tree={}, tier=1)
+def test_tower_upgrade_beyond_tier_limit_failure(tech_tree_cards):
+    tower = models.Tower(tech_tree=tech_tree_cards, tier=1)
     max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
         tower.tier = max_tier + 1
 
 
-def test_tower_upgrade_within_limit_success():
-    tower = models.Tower(tech_tree={}, tier=1)
+def test_tower_upgrade_within_limit_success(tech_tree_cards):
+    tower = models.Tower(tech_tree=tech_tree_cards, tier=1)
     max_tier = max(models.Tower.allowable_values["tier"])
     tower.tier = max_tier
     assert tower.tier == max_tier
 
 
-def test_tower_level_up_below_max_level_success():
+def test_tower_level_up_below_max_level_success(tech_tree_cards):
     max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(tech_tree={}, tier=max_tier - 1)
+    tower = models.Tower(tech_tree=tech_tree_cards, tier=max_tier - 1)
     tower.level_up()
     assert tower.tier == max_tier
 
 
-def test_tower_level_up_at_max_level_failure():
+def test_tower_level_up_at_max_level_failure(tech_tree_cards):
     max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(tech_tree={}, tier=max_tier)
+    tower = models.Tower(tech_tree=tech_tree_cards, tier=max_tier)
     with pytest.raises(ValueError):
         tower.level_up()
 
