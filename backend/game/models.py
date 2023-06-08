@@ -3,8 +3,6 @@
 """
 
 from django.db import models
-from typing import get_type_hints
-import inspect
 
 
 def _inclusive_range(start: int, stop: int):
