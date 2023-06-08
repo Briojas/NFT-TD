@@ -110,7 +110,7 @@ class Tower:
             tier (int, optional): The "level" of the tower
                                   Default 1. Max 3.
         """
-        self.tech_tree = tech_tree
+        self.tech_tree = TechTree(tech_tree)
         self.unlocked_cards = unlocked_cards if unlocked_cards else set()
         self._tier = tier
 
