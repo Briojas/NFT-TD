@@ -57,14 +57,6 @@ def _validate_inputs(func):
     return wrapper
 
 
-class TooManyCardsError(ValueError):
-    def __init__(self, message=None, extra_info=None):
-        if message is None:
-            message = "The number of cards may not exceed the tower's tier"
-        super().__init__(message)
-        self.extra_info = extra_info
-
-
 class AdditiveBehavior:
     allowable_values = {
         'power': _inclusive_range(1, 3),
@@ -109,45 +101,23 @@ class Tower:
     }
 
     @_validate_inputs
-    def __init__(self, id: int, cards: dict, tier: int=1):
+    def __init__(self, tech_tree, unlocked_cards: set=None, tier: int=1):
         """Initialize a Tower instance
 
         Args:
-            id (int): _description_
-            cards (dict): A dictionary of the towers behavior cards.
-              The number of cards allowed corresponds to the tier of the tower.
-              The order of the dictionary prioritizes the logical firing order
-              for the behaviors.
-
-              Ex: cards = {
-                   1: card1,  # This card will be the first to be applied
-                   2: card2   # This card will be the second to be applied
-              }
-            tier (int, optional): The "level" of the tower. Defaults to 1. Max 3.
+            tech_tree (TechTree): A tech tree defining cards and their
+                                  prerequisites
+            tier (int, optional): The "level" of the tower
+                                  Default 1. Max 3.
         """
-        if len(cards) > tier:
-            raise TooManyCardsError
-
-        self.id = id
-        # Ensure stored cards are sorted
-        self._cards = {k: v for k, v in sorted(cards.items())}
+        self.tech_tree = tech_tree
+        self.unlocked_cards = unlocked_cards if unlocked_cards else set()
         self._tier = tier
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.cards == other.cards
+            return self.tech_tree == other.tech_tree
         return False  # pragma: no cover
-
-    @property
-    def cards(self):
-        return self._cards
-
-    @cards.setter
-    def cards(self, cards):
-        if len(cards) > self.tier:
-            raise TooManyCardsError
-        # Ensure stored cards are sorted
-        self._cards = {k: v for k, v in sorted(cards.items())}
 
     @property
     def tier(self):
@@ -161,3 +131,41 @@ class Tower:
     def level_up(self):
         self.tier += 1
         # At this point, a card may be added to the tower
+
+
+class TechTree:
+    def __init__(self, cards):
+        self.cards = {}
+        
+        # Add cards to the tree
+        for card_name, card in cards.items():
+            self.add_card(card_name, card)
+
+        # Set prerequisites
+        self.add_prerequisite('Mid1', prerequisite='Top1')
+        self.add_prerequisite('Mid2', prerequisite='Top1')
+        self.add_prerequisite('Mid2', prerequisite='Top2')
+        self.add_prerequisite('Mid3', prerequisite='Top2')
+        self.add_prerequisite('Bot1', prerequisite='Mid1')
+        self.add_prerequisite('Bot1', prerequisite='Mid2')
+        self.add_prerequisite('Bot2', prerequisite='Mid2')
+        self.add_prerequisite('Bot2', prerequisite='Mid3')
+
+    def add_card(self, card_name, card):
+        # Add a card with no prerequisites
+        if card_name not in self.cards:
+            self.cards[card_name] = {'card': card, 'prerequisites': set()}
+
+    def add_prerequisite(self, card_name, prerequisite):
+        # Add the prerequisite to the prerequisites for the card
+        if prerequisite not in self.cards[card_name]['prerequisites']:
+            self.cards[card_name]['prerequisites'].add(prerequisite)
+
+    def is_unlockable(self, card_name, unlocked_cards):
+        # Returns true if any of the prerequisites for the card are in the list of unlocked cards
+        prereqs = self.cards[card_name]['prerequisites']
+        if prereqs:
+            intersection = prereqs.intersection(set(unlocked_cards))
+        else:
+            return True
+        return bool(intersection)

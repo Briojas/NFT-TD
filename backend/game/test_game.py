@@ -60,11 +60,10 @@ def test_multiplicative_behavior_initialization(power, range, rate):
     assert behavior.rate == rate
 
 
-@pytest.mark.parametrize("id,cards", [(1, {})])
-def test_tower_initialization(id, cards):
-    tower = models.Tower(id=id, cards=cards)
-    assert tower.id == id
-    assert tower.cards == cards
+@pytest.mark.parametrize("tech_tree", [({})])
+def test_tower_initialization(tech_tree):
+    tower = models.Tower(tech_tree=tech_tree)
+    assert tower.tech_tree == tech_tree
     assert tower.tier == 1  # Default value
 
 
@@ -104,42 +103,42 @@ def test_behaviors_of_differing_types_are_not_equal():
     assert not card1 == card2
 
 
-def test_tower_with_same_cards_in_same_order_are_equal():
+def test_tower_with_same_tech_tree_in_same_order_are_equal():
     card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
     card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
-    tower2 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
+    tower1 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
+    tower2 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
     assert tower1 == tower2
 
 
-def test_tower_with_same_cards_in_different_order_are_not_equal():
+def test_tower_with_same_tech_tree_in_different_order_are_not_equal():
     card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
     card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower1 = models.Tower(id=1, cards={1: card1, 2: card2}, tier=2)
-    tower2 = models.Tower(id=1, cards={1: card2, 2: card1}, tier=2)
+    tower1 = models.Tower(tech_tree={1: card1, 2: card2}, tier=2)
+    tower2 = models.Tower(tech_tree={1: card2, 2: card1}, tier=2)
     assert not tower1 == tower2
 
 
 def test_tower_is_not_equal_to_non_tower_object():
-    tower = models.Tower(id=1, cards={})
+    tower = models.Tower(tech_tree={})
     assert not tower == 1
 
 
 def test_tower_initialization_beyond_tier_limit_failure():
     max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
-        tower = models.Tower(id=1, cards={}, tier= max_tier + 1)
+        tower = models.Tower(tech_tree={}, tier= max_tier + 1)
 
 
 def test_tower_upgrade_beyond_tier_limit_failure():
-    tower = models.Tower(id=1, cards={}, tier=1)
+    tower = models.Tower(tech_tree={}, tier=1)
     max_tier = max(models.Tower.allowable_values["tier"])
     with pytest.raises(ValueError):
         tower.tier = max_tier + 1
 
 
 def test_tower_upgrade_within_limit_success():
-    tower = models.Tower(id=1, cards={}, tier=1)
+    tower = models.Tower(tech_tree={}, tier=1)
     max_tier = max(models.Tower.allowable_values["tier"])
     tower.tier = max_tier
     assert tower.tier == max_tier
@@ -147,36 +146,55 @@ def test_tower_upgrade_within_limit_success():
 
 def test_tower_level_up_below_max_level_success():
     max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(id=1, cards={}, tier=max_tier - 1)
+    tower = models.Tower(tech_tree={}, tier=max_tier - 1)
     tower.level_up()
     assert tower.tier == max_tier
 
 
 def test_tower_level_up_at_max_level_failure():
     max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(id=1, cards={}, tier=max_tier)
+    tower = models.Tower(tech_tree={}, tier=max_tier)
     with pytest.raises(ValueError):
         tower.level_up()
 
 
-def test_tower_cards_cannot_exceed_tier_at_initialization():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    with pytest.raises(models.TooManyCardsError):
-        models.Tower(id=1, cards={1: card1, 2: card2}, tier=1)
+def test_tech_tree_initialization():
+    tech_tree = models.TechTree(
+        cards={
+            'Top1': 'Top1 card',
+            'Top2': 'Top2 card',
+            'Mid1': 'Mid1 card',
+            'Mid2': 'Mid2 card',
+            'Mid3': 'Mid3 card',
+            'Bot1': 'Bot1 card',
+            'Bot2': 'Bot2 card'
+        }
+    )
 
+    for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
+        assert name in tech_tree.cards
 
-def test_tower_cards_cannot_exceed_tier_at_card_setter():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower = models.Tower(id=1, cards={1: card1}, tier=1)
-    with pytest.raises(models.TooManyCardsError):
-        tower.cards = {1: card1, 2: card2}
+    assert tech_tree.cards['Top1']['prerequisites'] == set()
+    assert tech_tree.cards['Top2']['prerequisites'] == set()
+    assert tech_tree.cards['Mid1']['prerequisites'] == set(['Top1'])
+    assert tech_tree.cards['Mid2']['prerequisites'] == set(['Top1', 'Top2'])
+    assert tech_tree.cards['Mid3']['prerequisites'] == set(['Top2'])
+    assert tech_tree.cards['Bot1']['prerequisites'] == set(['Mid1', 'Mid2'])
+    assert tech_tree.cards['Bot2']['prerequisites'] == set(['Mid2', 'Mid3'])
+        
 
-
-def test_tower_cards_can_be_set_if_below_tier_limit():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    tower = models.Tower(id=1, cards={1: card1}, tier=2)
-    tower.cards = {1: card1, 2: card2}
-    assert tower.cards == {1: card1, 2: card2}
+def test_tech_tree_node_is_unlockable():
+    tech_tree = models.TechTree(
+        cards={
+            'Top1': 'Top1 card',
+            'Top2': 'Top2 card',
+            'Mid1': 'Mid1 card',
+            'Mid2': 'Mid2 card',
+            'Mid3': 'Mid3 card',
+            'Bot1': 'Bot1 card',
+            'Bot2': 'Bot2 card'
+        }
+    )
+    assert tech_tree.is_unlockable('Top1', unlocked_cards=[]) == True
+    assert tech_tree.is_unlockable('Bot2', unlocked_cards=[]) == False
+    assert tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']) == True
