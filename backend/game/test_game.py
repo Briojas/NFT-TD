@@ -6,9 +6,8 @@ from game import models
 
 
 @pytest.fixture
-def tech_tree():
-    tree = models.TechTree(
-        cards={
+def tech_tree_cards():
+    return {
             'Top1': 'Top1 card',
             'Top2': 'Top2 card',
             'Mid1': 'Mid1 card',
@@ -16,9 +15,7 @@ def tech_tree():
             'Mid3': 'Mid3 card',
             'Bot1': 'Bot1 card',
             'Bot2': 'Bot2 card'
-        }
-    )
-    return tree
+    }
 
 
 def test_validation_wrapper():
@@ -174,7 +171,9 @@ def test_tower_level_up_at_max_level_failure():
         tower.level_up()
 
 
-def test_tech_tree_initialization(tech_tree):
+def test_tech_tree_initialization(tech_tree_cards):
+    tech_tree = models.TechTree(cards=tech_tree_cards)
+
     for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
         assert name in tech_tree.cards
 
@@ -187,7 +186,9 @@ def test_tech_tree_initialization(tech_tree):
     assert tech_tree.cards['Bot2']['prerequisites'] == set(['Mid2', 'Mid3'])
         
 
-def test_tech_tree_node_is_unlockable(tech_tree):
+def test_tech_tree_node_is_unlockable(tech_tree_cards):
+    tech_tree = models.TechTree(cards=tech_tree_cards)
+
     assert tech_tree.is_unlockable('Top1', unlocked_cards=[]) == True
     assert tech_tree.is_unlockable('Bot2', unlocked_cards=[]) == False
     assert tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']) == True
