@@ -73,8 +73,8 @@ def test_multiplicative_behavior_initialization(power, range, rate):
     assert behavior.rate == rate
 
 
-def test_tower_initialization(tech_tree):
-    tower = models.Tower(tech_tree=tech_tree)
+def test_tower_initialization(tech_tree_cards):
+    tower = models.Tower(tech_tree=tech_tree_cards)
     assert isinstance(tower.tech_tree, models.TechTree)
     assert tower.tier == 1  # Default value
 
@@ -113,6 +113,35 @@ def test_behaviors_of_differing_types_are_not_equal():
     card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
     card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
     assert not card1 == card2
+
+
+def test_tech_tree_initialization(tech_tree_cards):
+    tech_tree = models.TechTree(cards=tech_tree_cards)
+
+    for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
+        assert name in tech_tree.cards
+
+    assert tech_tree.cards['Top1']['prerequisites'] == set()
+    assert tech_tree.cards['Top2']['prerequisites'] == set()
+    assert tech_tree.cards['Mid1']['prerequisites'] == set(['Top1'])
+    assert tech_tree.cards['Mid2']['prerequisites'] == set(['Top1', 'Top2'])
+    assert tech_tree.cards['Mid3']['prerequisites'] == set(['Top2'])
+    assert tech_tree.cards['Bot1']['prerequisites'] == set(['Mid1', 'Mid2'])
+    assert tech_tree.cards['Bot2']['prerequisites'] == set(['Mid2', 'Mid3'])
+
+
+def test_tech_tree_node_is_unlockable(tech_tree_cards):
+    tech_tree = models.TechTree(cards=tech_tree_cards)
+
+    assert tech_tree.is_unlockable('Top1', unlocked_cards=[]) == True
+    assert tech_tree.is_unlockable('Bot2', unlocked_cards=[]) == False
+    assert tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']) == True
+
+
+def test_identical_tech_tree_is_equal(tech_tree_cards):
+    tree1 = models.TechTree(cards=tech_tree_cards)
+    tree2 = models.TechTree(cards=tech_tree_cards)
+    assert tree1 == tree2
 
 
 def test_tower_with_same_tech_tree_are_equal(tech_tree_cards):
@@ -158,26 +187,3 @@ def test_tower_level_up_at_max_level_failure(tech_tree_cards):
     tower = models.Tower(tech_tree=tech_tree_cards, tier=max_tier)
     with pytest.raises(ValueError):
         tower.level_up()
-
-
-def test_tech_tree_initialization(tech_tree_cards):
-    tech_tree = models.TechTree(cards=tech_tree_cards)
-
-    for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
-        assert name in tech_tree.cards
-
-    assert tech_tree.cards['Top1']['prerequisites'] == set()
-    assert tech_tree.cards['Top2']['prerequisites'] == set()
-    assert tech_tree.cards['Mid1']['prerequisites'] == set(['Top1'])
-    assert tech_tree.cards['Mid2']['prerequisites'] == set(['Top1', 'Top2'])
-    assert tech_tree.cards['Mid3']['prerequisites'] == set(['Top2'])
-    assert tech_tree.cards['Bot1']['prerequisites'] == set(['Mid1', 'Mid2'])
-    assert tech_tree.cards['Bot2']['prerequisites'] == set(['Mid2', 'Mid3'])
-        
-
-def test_tech_tree_node_is_unlockable(tech_tree_cards):
-    tech_tree = models.TechTree(cards=tech_tree_cards)
-
-    assert tech_tree.is_unlockable('Top1', unlocked_cards=[]) == True
-    assert tech_tree.is_unlockable('Bot2', unlocked_cards=[]) == False
-    assert tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']) == True

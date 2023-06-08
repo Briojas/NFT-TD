@@ -151,6 +151,11 @@ class TechTree:
         self.add_prerequisite('Bot2', prerequisite='Mid2')
         self.add_prerequisite('Bot2', prerequisite='Mid3')
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.cards == other.cards
+        return False  # pragma: no cover
+
     def add_card(self, card_name, card):
         # Add a card with no prerequisites
         if card_name not in self.cards:
