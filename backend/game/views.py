@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from . import models
 import json
 
 
+@csrf_exempt
 def create_additive_card(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -18,6 +20,7 @@ def create_additive_card(request):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@csrf_exempt
 def create_multiplicative_card(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -25,7 +28,7 @@ def create_multiplicative_card(request):
         response = {
             'power': multiplicative_card.power,
             'range': multiplicative_card.range,
-            'radius': multiplicative_card.radius
+            'rate': multiplicative_card.rate
         }
         return JsonResponse(response, status=201)
     else:
