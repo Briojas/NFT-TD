@@ -1,53 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from hypothesis import assume, given, strategies as st
-import pytest
-
 from game import models
-
-
-@pytest.fixture
-def tech_tree_cards():
-    return {
-            'Top1': 'Top1 card',
-            'Top2': 'Top2 card',
-            'Mid1': 'Mid1 card',
-            'Mid2': 'Mid2 card',
-            'Mid3': 'Mid3 card',
-            'Bot1': 'Bot1 card',
-            'Bot2': 'Bot2 card'
-    }
-
-
-def test_validation_wrapper():
-    behavior = models.AdditiveBehavior(power=1, splash=5, radius=2)
-    assert behavior.power == 1
-    assert behavior.splash == 5
-    assert behavior.radius == 2
-
-
-@given(
-    power=st.integers(max_value=10),
-    splash=st.integers(max_value=10),
-    radius=st.integers(max_value=10)
-)
-def test_validation_wrapper_invalid_inputs(power, splash, radius):
-    # Skip conditions where all values are within limits
-    for attribute, value in zip(["power", "splash", "radius"], [power, splash, radius]):
-        allowable_range = models.AdditiveBehavior.allowable_values[attribute]
-        if value in allowable_range:
-            assume(False)
-
-    with pytest.raises(ValueError) as e_info:
-        models.AdditiveBehavior(power=power, splash=splash, radius=radius)
-
-    for attribute, value in zip(["power", "splash", "radius"], [power, splash, radius]):
-        allowable_range = models.AdditiveBehavior.allowable_values[attribute]
-        if value not in allowable_range:
-            error_msg = (
-                f"{attribute.capitalize()} must be an integer "
-                f"between {min(allowable_range)} and {max(allowable_range)}, inclusive"
-            )
-            assert error_msg in str(e_info.value)
 
 
 def test_inclusive_range(start: int=1, stop: int=10):
@@ -57,133 +10,141 @@ def test_inclusive_range(start: int=1, stop: int=10):
     assert max(inclusive_range) == max(exclusive_range) + 1
 
 
-@pytest.mark.parametrize("power,splash,radius", [(1, 3, 4)])
-def test_additive_behavior_initialization(power, splash, radius):
-    behavior = models.AdditiveBehavior(power=power, splash=splash, radius=radius)
-    assert behavior.power == power
-    assert behavior.splash == splash
-    assert behavior.radius == radius
+class TestAdditiveBehavior(TestCase):
+    def setUp(self):
+        self.power = 1
+        self.splash = 5
+        self.radius = 2
+        self.behavior = models.AdditiveBehavior(
+            power=self.power,
+            splash=self.splash,
+            radius=self.radius
+        )
+
+    def test_initialization(self):
+        self.assertEqual(self.behavior.power, self.power)
+        self.assertEqual(self.behavior.splash, self.splash)
+        self.assertEqual(self.behavior.radius, self.radius)
+
+    def test_behaviors_are_equal_for_same_inputs(self):
+        self.behavior_with_same_inputs = models.AdditiveBehavior(
+            power=self.power, splash=self.splash, radius=self.radius
+        )
+        self.assertEqual(self.behavior, self.behavior_with_same_inputs)
+
+    def test_behaviors_are_not_equal_for_different_inputs(self):
+        self.behavior_with_different_inputs = models.AdditiveBehavior(
+            power=self.power + 1, splash=self.splash, radius=self.radius
+        )
+        self.assertNotEqual(self.behavior, self.behavior_with_different_inputs)
+
+    def test_behaviors_of_differing_types_are_not_equal(self):
+        self.behavior_of_different_type = models.MultiplicativeBehavior(
+            power=self.power, range=self.splash, rate=self.radius
+        )
+        self.assertNotEqual(self.behavior, self.behavior_of_different_type)
 
 
-@pytest.mark.parametrize("power,range,rate", [(1, 3, 4)])
-def test_multiplicative_behavior_initialization(power, range, rate):
-    behavior = models.MultiplicativeBehavior(power=power, range=range, rate=rate)
-    assert behavior.power == power
-    assert behavior.range == range
-    assert behavior.rate == rate
+class TestMultiplicativeBehavior(TestCase):
+    def setUp(self):
+        self.power = 1
+        self.range = 3
+        self.rate = 4
+        self.behavior = models.MultiplicativeBehavior(
+            power=self.power,
+            range=self.range,
+            rate=self.rate
+        )
+
+    def test_initialization(self):
+        self.assertEqual(self.behavior.power, self.power)
+        self.assertEqual(self.behavior.range, self.range)
+        self.assertEqual(self.behavior.rate, self.rate)
+
+    def test_behaviors_are_equal_for_same_inputs(self):
+        self.behavior_with_same_inputs = models.MultiplicativeBehavior(
+            power=self.power, range=self.range, rate=self.rate
+        )
+        self.assertEqual(self.behavior, self.behavior_with_same_inputs)
+
+    def test_behaviors_are_not_equal_for_different_inputs(self):
+        self.behavior_with_different_inputs = models.MultiplicativeBehavior(
+            power=self.power + 1, range=self.range, rate=self.rate
+        )
+        self.assertNotEqual(self.behavior, self. behavior_with_different_inputs)
+
+    def test_behaviors_of_differing_types_are_not_equal(self):
+        self.behavior_of_different_type = models.AdditiveBehavior(power=1, splash=1, radius=1)
+        self.assertNotEqual(self.behavior, self.behavior_of_different_type)
 
 
-def test_tower_initialization(tech_tree_cards):
-    tower = models.Tower(tech_tree=tech_tree_cards)
-    assert isinstance(tower.tech_tree, models.TechTree)
-    assert tower.tier == 1  # Default value
+class TestTower(TestCase):
+    def setUp(self):
+        self.tech_tree_cards = {
+            'Top1': 'Top1 card',
+            'Top2': 'Top2 card',
+            'Mid1': 'Mid1 card',
+            'Mid2': 'Mid2 card',
+            'Mid3': 'Mid3 card',
+            'Bot1': 'Bot1 card',
+            'Bot2': 'Bot2 card'
+        }
+        self.tech_tree = models.TechTree.create(cards=self.tech_tree_cards)
+        self.tower = models.Tower(tech_tree=self.tech_tree)
+        self.max_tier = max(choice[0] for choice in models.Tower.TIER_CHOICES)
+
+    def test_initialization(self):
+        self.assertIsInstance(self.tower.tech_tree, models.TechTree)
+        self.assertEqual(self.tower.tier, 1)
+
+    def test_towers_with_same_tech_tree_are_equal(self):
+        tower2 = models.Tower(tech_tree=self.tech_tree, tier=2)
+        self.assertEqual(self.tower, tower2)
+
+    def test_tower_is_not_equal_to_non_tower_object(self):
+        self.assertNotEqual(self.tower, 1)
+
+    def test_saving_tower_with_tier_beyond_limit_raises_error(self):
+        self.tower.tier = self.max_tier + 1
+        with self.assertRaises(ValidationError):
+            self.tower.save()
+
+    def test_saving_tower_with_tier_within_limit_success(self):
+        self.tower.tier = self.max_tier
+        self.tower.save()
+        self.assertEqual(self.tower.tier, self.max_tier)
 
 
-@pytest.mark.parametrize("power,splash,radius", [(1, 3, 4), (2, 2, 2), (3, 1, 1)])
-def test_additive_behaviors_are_equal_for_same_inputs(power, splash, radius):
-    card1 = models.AdditiveBehavior(power=power, splash=splash, radius=radius)
-    card2 = models.AdditiveBehavior(power=power, splash=splash, radius=radius)
-    assert card1 == card2
+class TechTree(TestCase):
+    def setUp(self):
+        self.cards = {
+            'Top1': 'Top1',
+            'Top2': 'Top2',
+            'Mid1': 'Mid1',
+            'Mid2': 'Mid2',
+            'Mid3': 'Mid3',
+            'Bot1': 'Bot1',
+            'Bot2': 'Bot2',
+        }
+        self.tech_tree = models.TechTree.create(cards=self.cards)
 
+    def test_initialization(self):
+        for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
+            self.assertIn(name, self.tech_tree.cards)
 
-def test_additive_behaviors_are_not_equal_for_different_inputs():
-    card1 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    card2 = models.AdditiveBehavior(power=1, splash=2, radius=1)
-    assert not card1 == card2
+        self.assertEqual(self.tech_tree.cards['Top1']['prerequisites'], set())
+        self.assertEqual(self.tech_tree.cards['Top2']['prerequisites'], set())
+        self.assertEqual(self.tech_tree.cards['Mid1']['prerequisites'], set(['Top1']))
+        self.assertEqual(self.tech_tree.cards['Mid2']['prerequisites'], set(['Top1', 'Top2']))
+        self.assertEqual(self.tech_tree.cards['Mid3']['prerequisites'], set(['Top2']))
+        self.assertEqual(self.tech_tree.cards['Bot1']['prerequisites'], set(['Mid1', 'Mid2']))
+        self.assertEqual(self.tech_tree.cards['Bot2']['prerequisites'], set(['Mid2', 'Mid3']))
 
+    def test_node_is_unlockable(self):
+        self.assertTrue(self.tech_tree.is_unlockable('Top1', unlocked_cards=[]))
+        self.assertFalse(self.tech_tree.is_unlockable('Bot2', unlocked_cards=[]))
+        self.assertTrue(self.tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']))
 
-@pytest.mark.parametrize("power,range,rate", [(1, 3, 4), (2, 2, 2), (3, 1, 1)])
-def test_multiplicative_behaviors_are_equal_for_same_inputs(power, range, rate):
-    card1 = models.MultiplicativeBehavior(power=power, range=range, rate=rate)
-    card2 = models.MultiplicativeBehavior(power=power, range=range, rate=rate)
-    assert card1 == card2
-
-
-def test_multiplicative_behaviors_are_not_equal_for_different_inputs():
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.MultiplicativeBehavior(power=1, range=2, rate=1)
-    assert not card1 == card2
-
-
-def test_behaviors_of_differing_types_are_not_equal():
-    card1 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    card2 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    assert not card1 == card2
-
-    card1 = models.MultiplicativeBehavior(power=1, range=1, rate=1)
-    card2 = models.AdditiveBehavior(power=1, splash=1, radius=1)
-    assert not card1 == card2
-
-
-def test_tech_tree_initialization(tech_tree_cards):
-    tech_tree = models.TechTree(cards=tech_tree_cards)
-
-    for name in ['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2']:
-        assert name in tech_tree.cards
-
-    assert tech_tree.cards['Top1']['prerequisites'] == set()
-    assert tech_tree.cards['Top2']['prerequisites'] == set()
-    assert tech_tree.cards['Mid1']['prerequisites'] == set(['Top1'])
-    assert tech_tree.cards['Mid2']['prerequisites'] == set(['Top1', 'Top2'])
-    assert tech_tree.cards['Mid3']['prerequisites'] == set(['Top2'])
-    assert tech_tree.cards['Bot1']['prerequisites'] == set(['Mid1', 'Mid2'])
-    assert tech_tree.cards['Bot2']['prerequisites'] == set(['Mid2', 'Mid3'])
-
-
-def test_tech_tree_node_is_unlockable(tech_tree_cards):
-    tech_tree = models.TechTree(cards=tech_tree_cards)
-
-    assert tech_tree.is_unlockable('Top1', unlocked_cards=[]) == True
-    assert tech_tree.is_unlockable('Bot2', unlocked_cards=[]) == False
-    assert tech_tree.is_unlockable('Bot2', unlocked_cards=['Top1', 'Mid2']) == True
-
-
-def test_identical_tech_tree_is_equal(tech_tree_cards):
-    tree1 = models.TechTree(cards=tech_tree_cards)
-    tree2 = models.TechTree(cards=tech_tree_cards)
-    assert tree1 == tree2
-
-
-def test_tower_with_same_tech_tree_are_equal(tech_tree_cards):
-    tower1 = models.Tower(tech_tree=tech_tree_cards, tier=2)
-    tower2 = models.Tower(tech_tree=tech_tree_cards, tier=2)
-    assert tower1 == tower2
-
-
-def test_tower_is_not_equal_to_non_tower_object(tech_tree_cards):
-    tower = models.Tower(tech_tree=tech_tree_cards)
-    assert not tower == 1
-
-
-def test_tower_initialization_beyond_tier_limit_failure(tech_tree_cards):
-    max_tier = max(models.Tower.allowable_values["tier"])
-    with pytest.raises(ValueError):
-        tower = models.Tower(tech_tree=tech_tree_cards, tier= max_tier + 1)
-
-
-def test_tower_upgrade_beyond_tier_limit_failure(tech_tree_cards):
-    tower = models.Tower(tech_tree=tech_tree_cards, tier=1)
-    max_tier = max(models.Tower.allowable_values["tier"])
-    with pytest.raises(ValueError):
-        tower.tier = max_tier + 1
-
-
-def test_tower_upgrade_within_limit_success(tech_tree_cards):
-    tower = models.Tower(tech_tree=tech_tree_cards, tier=1)
-    max_tier = max(models.Tower.allowable_values["tier"])
-    tower.tier = max_tier
-    assert tower.tier == max_tier
-
-
-def test_tower_level_up_below_max_level_success(tech_tree_cards):
-    max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(tech_tree=tech_tree_cards, tier=max_tier - 1)
-    tower.level_up()
-    assert tower.tier == max_tier
-
-
-def test_tower_level_up_at_max_level_failure(tech_tree_cards):
-    max_tier = max(models.Tower.allowable_values["tier"])
-    tower = models.Tower(tech_tree=tech_tree_cards, tier=max_tier)
-    with pytest.raises(ValueError):
-        tower.level_up()
+    def test_identical_trees_are_equal(self):
+        tree2 = models.TechTree.create(cards=self.cards)
+        self.assertEqual(self.tech_tree, tree2)

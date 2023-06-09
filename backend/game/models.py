@@ -20,7 +20,11 @@ class AdditiveBehavior(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return vars(self) == vars(other)
+            return (
+                self.power == other.power and
+                self.splash == other.splash and
+                self.radius == other.radius
+            )
         return False
 
     def save(self, *args, **kwargs):
@@ -39,7 +43,11 @@ class MultiplicativeBehavior(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return vars(self) == vars(other)
+            return (
+                self.power == other.power and
+                self.range == other.range and
+                self.rate == other.rate
+            )
         return False
 
     def save(self, *args, **kwargs):
@@ -47,42 +55,29 @@ class MultiplicativeBehavior(models.Model):
         return super().save(*args, **kwargs)
 
 
-class Tower(models.Model):
-    TIER_CHOICES = [(i,i) for i in _inclusive_range(1, 3)]
-
-    tier = models.IntegerField(choices=TIER_CHOICES)
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.tech_tree == other.tech_tree
-        return False  # pragma: no cover
-
-    def level_up(self):
-        self.tier += 1
-        # At this point, a card may be added to the tower
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
-
-
 class TechTree(models.Model):
-    def __init__(self, cards, *args, **kwargs):
-        super(TechTree, self).__init__(*args, **kwargs)
-        
+    cards = models.JSONField()
+
+    @classmethod
+    def create(cls, cards):
+        tech_tree = cls()
+        tech_tree.cards = {}
+
         # Add cards to the tree
         for card_name, card in cards.items():
-            self.add_card(card_name, card)
+            tech_tree.add_card(card_name, card)
 
         # Set prerequisites
-        self.add_prerequisite('Mid1', prerequisite='Top1')
-        self.add_prerequisite('Mid2', prerequisite='Top1')
-        self.add_prerequisite('Mid2', prerequisite='Top2')
-        self.add_prerequisite('Mid3', prerequisite='Top2')
-        self.add_prerequisite('Bot1', prerequisite='Mid1')
-        self.add_prerequisite('Bot1', prerequisite='Mid2')
-        self.add_prerequisite('Bot2', prerequisite='Mid2')
-        self.add_prerequisite('Bot2', prerequisite='Mid3')
+        tech_tree.add_prerequisite('Mid1', prerequisite='Top1')
+        tech_tree.add_prerequisite('Mid2', prerequisite='Top1')
+        tech_tree.add_prerequisite('Mid2', prerequisite='Top2')
+        tech_tree.add_prerequisite('Mid3', prerequisite='Top2')
+        tech_tree.add_prerequisite('Bot1', prerequisite='Mid1')
+        tech_tree.add_prerequisite('Bot1', prerequisite='Mid2')
+        tech_tree.add_prerequisite('Bot2', prerequisite='Mid2')
+        tech_tree.add_prerequisite('Bot2', prerequisite='Mid3')
+
+        return tech_tree
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -107,6 +102,25 @@ class TechTree(models.Model):
         else:
             return True
         return bool(intersection)
+
+    def save(self, *args, **kwargs):
+        return super().save(*args, **kwargs)
+
+
+class Tower(models.Model):
+    TIER_CHOICES = [(i,i) for i in _inclusive_range(1, 3)]
+
+    tech_tree = models.ForeignKey(TechTree, on_delete=models.CASCADE)
+    tier = models.IntegerField(choices=TIER_CHOICES, default=1)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.tech_tree == other.tech_tree
+        return False  # pragma: no cover
+
+    def level_up(self):
+        self.tier += 1
+        # At this point, a card may be added to the tower
 
     def save(self, *args, **kwargs):
         self.full_clean()
