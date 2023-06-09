@@ -16,3 +16,19 @@
   flex-wrap: nowrap;
   align-self: start;
 }
+.minting-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-content: start;
+  align-items: start;
+  padding: 10px;
+  margin: 0px;
+  justify-items: center;
+  gap: 0px 250px;
+  border: 0px solid black;
+}
+.minting-buttons {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+}
