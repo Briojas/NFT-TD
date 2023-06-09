@@ -7,7 +7,7 @@ import { NavBar } from './components/nav-bar/nav-bar';
 import { TowerCard, TowerData } from './components/tower-card/tower-card';
 import { Icon } from '@blueprintjs/core';
 import App_module from './App.module.scss';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Value } from 'classnames';
 
 const connectors: [MetaMask, Web3ReactHooks][] = [[metaMask, metaMaskHooks]];
@@ -30,41 +30,32 @@ function Submit(data: TowerData) {
     );
 }
 
-// const tower11 = [1, 1, 0, 2, 11, 5];
-
-const tower11 = {
-    tier: 1,
-    priority: 1,
-    operator: 2,
-    data1: 2,
-    data2: 11,
-    data3: 5,
-};
-
 export default function App() {
+    const [tower11, setTower11] = useState({
+        tier: 3,
+        priority: 1,
+        operator: 0,
+        data1: 2,
+        data2: 11,
+        data3: 5,
+    });
+
     return (
         <Web3ReactProvider connectors={connectors}>
             <span className={App_module.app}>
                 <NavBar />
                 <div className={App_module['card-row']}>
-                    <TowerCard
-                        tower={tower11}
-                        // priority={tower11['priority']}
-                        // operator={tower11['operator']}
-                        // data1={tower11[3]}
-                        // data2={tower11[4]}
-                        // data3={tower11[5]}
-                    />
-                    <TowerCard tower={tower11} />
+                    <TowerCard tower={tower11} update={setTower11} />
+                    {/* <TowerCard tower={tower11} update={setTower11} /> */}
                 </div>
                 <div className={App_module['card-row']}>
-                    <TowerCard tower={tower11} />
-                    <TowerCard tower={tower11} />
-                    <TowerCard tower={tower11} />
+                    {/* <TowerCard tower={tower11} update={setTower11} />
+                    <TowerCard tower={tower11} update={setTower11} />
+                    <TowerCard tower={tower11} update={setTower11} /> */}
                 </div>
                 <div className={App_module['card-row']}>
-                    <TowerCard tower={tower11} />
-                    <TowerCard tower={tower11} />
+                    {/* <TowerCard tower={tower11} update={setTower11} />
+                    <TowerCard tower={tower11} update={setTower11} /> */}
                 </div>
                 <div className={App_module['minting-bar']}>
                     <button className={App_module['minting-buttons']}>

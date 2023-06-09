@@ -10,12 +10,12 @@ const tower = {
     data3: 9,
 };
 
-export default createBoard({
-    name: 'TowerCard',
-    Board: () => <TowerCard tower={tower} />,
-    environmentProps: {
-        windowWidth: 375,
-        windowHeight: 667,
-        canvasWidth: 298,
-    },
-});
+// export default createBoard({
+//     name: 'TowerCard',
+//     Board: () => <TowerCard tower={tower} />,
+//     environmentProps: {
+//         windowWidth: 375,
+//         windowHeight: 667,
+//         canvasWidth: 298,
+//     },
+// });

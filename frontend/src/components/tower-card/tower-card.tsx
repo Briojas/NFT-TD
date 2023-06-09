@@ -2,8 +2,9 @@ import type React from 'react';
 import { Card, Icon } from '@blueprintjs/core';
 import classNames, { Value } from 'classnames';
 import styles from './tower-card.module.scss';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, ChangeEvent } from 'react';
 import { BlueprintIcons_16 } from '@blueprintjs/icons/lib/esm/generated-icons/16px/blueprint-icons-16';
+import { HookCallbacks } from 'async_hooks';
 
 export interface TowerData {
     tier: number;
@@ -15,12 +16,13 @@ export interface TowerData {
 }
 
 export interface TowerCardProps {
-    tower?: TowerData;
+    tower: TowerData;
+    update: React.Dispatch<React.SetStateAction<TowerData>>;
     children?: React.ReactNode;
     className?: string;
 }
 
-export const TowerCard = ({ className, tower }: TowerCardProps) => {
+export const TowerCard = ({ className, tower, update }: TowerCardProps) => {
     const operators = [
         BlueprintIcons_16['Divide'],
         BlueprintIcons_16['Cross'],
@@ -36,16 +38,27 @@ export const TowerCard = ({ className, tower }: TowerCardProps) => {
     // ];
     // const [isConditional, setIsConditional] = useState(false);
 
-    const [operator, setOperator] = useState(tower?.operator || 0);
-    if (operator < 0) {
-        setOperator(0);
-    } else if (operator > operators.length - 1) {
-        setOperator(operators.length - 1);
-    }
+    // Function to handle changes in the form inputs
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        update((prevData: TowerData) => ({
+            ...prevData,
+            [name]: parseInt(value),
+        }));
+    };
 
-    const [data1, setData1] = useState(tower?.data1 || 2);
-    const [data2, setData2] = useState(tower?.data2 || 11);
-    const [data3, setData3] = useState(tower?.data3 || 5);
+    const handleOperator = (value: number) => {
+        update((prevData: TowerData) => ({
+            ...prevData,
+            operator: value,
+        }));
+    };
+
+    if (tower.operator < 0) {
+        handleOperator(0);
+    } else if (tower.operator > operators.length - 1) {
+        handleOperator(operators.length - 1);
+    }
 
     var data1Name = 'Power';
     var data2Name = 'Range';
@@ -69,16 +82,16 @@ export const TowerCard = ({ className, tower }: TowerCardProps) => {
                     <div className={styles['priority-operator-selector']}>
                         <button
                             className={styles.adjustor}
-                            onClick={() => setOperator(operator - 1)}
+                            onClick={() => handleOperator(tower.operator - 1)}
                         >
                             <Icon icon="caret-left" size={10} />
                         </button>
                     </div>
-                    <Icon icon={operators[operator]} size={14} className={styles.operator} />
+                    <Icon icon={operators[tower.operator]} size={14} className={styles.operator} />
                     <div className={styles['priority-operator-selector']}>
                         <button
                             className={styles.adjustor}
-                            onClick={() => setOperator(operator + 1)}
+                            onClick={() => handleOperator(tower.operator + 1)}
                         >
                             <Icon icon="caret-right" size={10} />
                         </button>
@@ -132,37 +145,39 @@ export const TowerCard = ({ className, tower }: TowerCardProps) => {
                         <p>{data1Name}</p>
                         <input
                             type="number"
-                            value={data1}
+                            name="data1"
+                            value={tower.data1}
                             min={0}
                             max={99}
                             className={styles['data-value']}
-                            onChange={(e) => setData1(parseInt(e.target.value))}
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className={classNames(styles.product_row, styles.data)}>
                         <p>{data2Name}</p>
                         <input
                             type="number"
-                            value={data2}
+                            name="data2"
+                            value={tower.data2}
                             min={0}
                             max={99}
                             className={styles['data-value']}
-                            onChange={(e) => setData2(parseInt(e.target.value))}
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className={styles.data}>
                         <p>{data3Name}</p>
                         <input
                             type="number"
-                            value={data3}
+                            name="data3"
+                            value={tower.data3}
                             min={0}
                             max={99}
                             className={styles['data-value']}
-                            onChange={(e) => setData3(parseInt(e.target.value))}
+                            onChange={handleInputChange}
                         />
                     </div>
                 </div>
-                {/* )} */}
             </Card>
         </Card>
     );
