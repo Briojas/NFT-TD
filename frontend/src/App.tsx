@@ -1,7 +1,7 @@
 import { useWeb3React, Web3ReactHooks, Web3ReactProvider } from '@web3-react/core';
 import type { MetaMask } from '@web3-react/metamask';
 import { ethers } from 'ethers';
-import { Web3Provider as web3 } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
 import { Web3Storage, File } from 'web3.storage';
 import { hooks as metaMaskHooks, metaMask } from './connectors/metamask';
 import { NavBar } from './components/nav-bar/nav-bar';
@@ -73,10 +73,16 @@ function Submit(data: TowerSubmission) {
             return;
         }
         const cid = await buildData(data);
-        const signer = await provider?.getSigner(0);
-        const contractAddress = '';
-        //STUCK HERE
-        // const contract = new ethers.Contract(contractAddress, [abi], provider);
+
+        const eth_provider = new ethers.BrowserProvider(connector.provider);
+        const eth_signer = await eth_provider.getSigner();
+        const contractAddress = '0x9f6105FB3b13F99F074cDC0CDDbc8222a9cc5129';
+        const contract = new ethers.Contract(contractAddress, abi.abi, eth_signer);
+
+        const tx = await contract.joinQueue(cid);
+        await tx.wait();
+        const status = contract.queue_status();
+        console.log(status);
     }
 
     return (
