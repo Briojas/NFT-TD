@@ -12,6 +12,7 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
     bytes32 public latestRequestId;
     bytes public latestResponse;
     bytes public latestError;
+    uint8 public responseHeaderSize = 4;
     uint64 public subscriptionId;
     uint32 public fulfillGasLimit;
 
@@ -26,12 +27,11 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
         sourceCode = _sourceCode;
         subscriptionId = _subscriptionId;
         fulfillGasLimit = _fulfillGasLimit;
-        latestResponse = "";
-        latestError = "";
+        resetFunctionResponse();
     }
 
     /**
-   * @notice Generates a new Functions.Request. This pure function allows the request CBOR to be generated off-chain, saving gas.
+   * @notice Generates a new Functions.Request.
    *
    * @param secrets Encrypted secrets payload
    * @param args List of arguments accessible from within the source code
@@ -63,34 +63,29 @@ abstract contract FunctionsWrapper is FunctionsClient, ConfirmedOwner {
         emit OCRResponse(requestId, response, err);
     }
 
-    /**
-    * @notice Allows the Functions request source code to be updated
-    *
-    * @param _sourceCode New source code
-    */
-    function updateSourceCode(string memory _sourceCode) public onlyOwner {
-         sourceCode = _sourceCode;
+    function gotFunctionResponse() internal view returns (bool) {
+        return latestResponse.length != latestError.length;
     }
 
-    /**
-    * @notice Allows the Functions oracle address to be updated
-    *
-    * @param oracle New oracle address
-    */
+    function validFunctionResponse(uint submissionSize) internal view returns (bool) {
+        require(latestResponse.length >= responseHeaderSize, "Invalid response length");
+        return (latestResponse.length - responseHeaderSize) == submissionSize;
+    }
+
+    function resetFunctionResponse() internal {
+        latestResponse = ""; 
+        latestError = "";
+    }
+        
+    function updateSourceCode(string memory _sourceCode) public onlyOwner {
+        sourceCode = _sourceCode;
+    }
+
     function updateOracleAddress(address oracle) public onlyOwner {
         setOracle(oracle);  
     }
 
-    /**
-    * @notice Allows the Functions subscription ID to be updated
-    *
-    * @param _subscriptionID New Subscription ID created
-    */
-    function updateSubscriptionID(uint64 _subscriptionID) public onlyOwner {
-        subscriptionId = _subscriptionID;
-    }
-
-    function gotFunctionResponse() public view returns (bool) {
-        return latestResponse.length != latestError.length;
+    function updateSubscriptionId(uint64 _subscriptionId) public onlyOwner {
+        subscriptionId = _subscriptionId;
     }
 }

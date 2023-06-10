@@ -52,7 +52,7 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
     upkeepNeeded = false;
     if (mintingQueue.state == CIDProcessorQueue.State.IDLE) {
-      upkeepNeeded = mintingQueue.tickets.curr_ticket < mintingQueue.tickets.num_tickets;
+      upkeepNeeded = mintingQueue.tickets.curr_ticket_no < mintingQueue.tickets.num_tickets;
     } else if (gotFunctionResponse()) {
       upkeepNeeded = true;
     } 
@@ -74,8 +74,13 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
       submit();
     }else {
       issue();
+      resetFunctionResponse();
     }
     mintingQueue.update_state();
+  }
+
+  function joinQueue(string calldata ipfsURL) public{
+    mintingQueue.join(msg.sender, ipfsURL);
   }
 
     //sends mint request off to Chainlink Functions to be verified 
@@ -86,15 +91,43 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
 
     //mints valid NFTs
   function issue() internal {
-    require (latestResponse.length == mintingQueue.submissionBatch.length);
+    require (validFunctionResponse(mintingQueue.submissionBatch.length));
+    address user;
+    string memory ipfs_url;
     for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
         //TODO: update for batch processing
-      if(latestResponse[i] == "1"){
-        mintToken(mintingQueue.pull_ticket_owner(), mintingQueue.pull_ticket_data(), 1);
-        mintingQueue.ticket_approved();
+      (user, ipfs_url, ) = mintingQueue.current_ticket();
+      if(latestResponse[responseHeaderSize + i] == "1"){
+        mintToken(user, ipfs_url, 1);
+        mintingQueue.ticket_approved(true);
       } else {
-        mintingQueue.ticket_rejected();
+        mintingQueue.ticket_approved(false);
       }
     }
   }
+
+  function queue_status() public view returns (CIDProcessorQueue.State state, uint256 num_tickets, uint256 curr_ticket_no, address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
+    state = mintingQueue.state;
+    num_tickets = mintingQueue.tickets.num_tickets;
+    curr_ticket_no = mintingQueue.tickets.curr_ticket_no;
+    (user, ipfs_url, result) = mintingQueue.current_ticket();
+  }
+
+  function ticket_status(uint256 ticket_no) public view returns (address user, string memory ipfs_url, CIDProcessorQueue.Result result) {
+    (user, ipfs_url, result) = mintingQueue.view_ticket(ticket_no);
+  }
+
+  function functions_status() public view returns (bytes32, bytes memory, bytes memory, string[] memory) {
+    return (
+      latestRequestId, 
+      latestResponse, 
+      latestError,
+      mintingQueue.submissionBatch
+    );
+  }
+
+  function debug() public view returns (uint256, bool){
+    return (latestResponse.length, validFunctionResponse(mintingQueue.submissionBatch.length));
+  }
+  //TODO: add resetting function
 }
