@@ -1,6 +1,7 @@
 import { useWeb3React, Web3ReactHooks, Web3ReactProvider } from '@web3-react/core';
 import type { MetaMask } from '@web3-react/metamask';
 import { ethers } from 'ethers';
+import { Web3Provider as web3 } from '@ethersproject/providers';
 import { Web3Storage, File } from 'web3.storage';
 import { hooks as metaMaskHooks, metaMask } from './connectors/metamask';
 import { NavBar } from './components/nav-bar/nav-bar';
@@ -9,6 +10,7 @@ import { Icon } from '@blueprintjs/core';
 import App_module from './App.module.scss';
 import { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
+import abi from './abi.json';
 
 const connectors: [MetaMask, Web3ReactHooks][] = [[metaMask, metaMaskHooks]];
 const WEB3_STORAGE_KEY = process.env.REACT_APP_WEB3_STORAGE_KEY || '?';
@@ -26,8 +28,6 @@ interface TowerSubmission {
 function Submit(data: TowerSubmission) {
     const { connector } = useWeb3React();
     const { isActive, chainId, account, provider } = useWeb3React();
-    // console.log(`Priority Connector is: ${getName(connector)}`);
-    // console.log(isActive, chainId, account, provider);
 
     async function storeCard(card: TowerData) {
         const client = new Web3Storage({ token: WEB3_STORAGE_KEY });
@@ -73,9 +73,10 @@ function Submit(data: TowerSubmission) {
             return;
         }
         const cid = await buildData(data);
-        const signer = provider?.getSigner();
+        const signer = await provider?.getSigner(0);
         const contractAddress = '';
-        const contract = new ethers.Contract(contractAddress, [], signer);
+        
+        const contract = new ethers.Contract(contractAddress, [abi], provider);
     }
 
     return (
