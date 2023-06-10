@@ -1,86 +1,54 @@
-# Contract Development
+# PrimeCrusaders Contract
+
+- address: 0x9f6105FB3b13F99F074cDC0CDDbc8222a9cc5129
+
+## Description
+
+Solidity contract implements the following functionality:
+
+- Chainlink Automations
+  - registry address: 0xE16Df59B887e3Caa439E0b29B42bA2e7976FD8b2
+- Chainlink Functions:
+  - subid: 334
+- ERC1155 Token Standard
+- custom IPFS CID processing queue library
+  - powered by Automations
 
 ## Setup
 
-- install brownie in virtual env
-
-  ```bash
-  pipenv run
-  pipenv install -r requirements.txt
-  ```
-
-- check brownie version
-
-  ```bash
-  pipenv run brownie --version
-  ```
-
-- Set `WEB3_INFURA_PROJECT_ID`, and `PRIVATE_KEY` [environment variables](https://www.twilio.com/blog/2017/01/how-to-set-environment-variables.html) in the `.env` file
-
-  ```
-  export WEB3_INFURA_PROJECT_ID=<PROJECT_ID>
-  export PRIVATE_KEY=<PRIVATE_KEY>
-  ```
-
-- Add the Sepolia network to brownie:
-
-  ```
-  pipenv run brownie networks add Ethereum sepolia host=https://sepolia.infura.io/v3/$WEB3_INFURA_PROJECT_ID chainid=11155111 explorer=https://sepolia.etherscan.io/
-  ```
-
-  - note: may need to include a ` character before $WEB3_INFURA_PROJECT_ID to recognize the dollar sign as a string
-
-- check sepolia network was added correctly:
-
-  ```bash
-  pipenv run brownie networks list true
-  ```
-
-- if needed, modify sepolia network details with:
-  ```bash
-  pipenv run brownie networks modify sepolia host=https://sepolia.infura.io/v3/`$WEB3_INFURA_PROJECT_ID
-  ```
-
-## Test Install
+1. install pipenv
+2. install dependencies
 
 ```bash
-brownie test --network sepolia
+pipenv install
 ```
 
-## Linting
+3. add environment variables
 
-```
-pip install black
-pip install autoflake
-autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r .
-black .
-```
+- WEB3_INFURA_PROJECT_ID - infura rpc
+- PRIVATE_KEY - private key of the deployer account
+- ETHERSCAN_TOKEN - etherscan api token
 
-If you're using [vscode](https://code.visualstudio.com/) and the [solidity extension](https://github.com/juanfranblanco/vscode-solidity), you can create a folder called `.vscode` at the root folder of this project, and create a file called `settings.json`, and add the following content:
+4. deploy contract
 
-```json
-{
-  "solidity.remappings": [
-    "@chainlink/=[YOUR_HOME_DIR]/.brownie/packages/smartcontractkit/chainlink-brownie-contracts@0.2.2",
-    "@openzeppelin/=[YOUR_HOME_DIR]/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.3.2"
-  ]
-}
+```bash
+pipenv run brownie run scripts/deploy.py --network sepolia
 ```
 
-This will quiet the linting errors it gives you.
+5. Use the [Chainlink Functions Hardhat](https://github.com/smartcontractkit/functions-hardhat-starter-kit/tree/main) tool to generate subscription and add contract to subid
 
-## Resources
+- see repo for details
 
-To get started with Brownie:
+6. Add contract to [Chainlink Automations](https://automation.chain.link/) registry
 
-- [Chainlink Documentation](https://docs.chain.link/docs)
-- Check out the [Chainlink documentation](https://docs.chain.link/docs) to get started from any level of smart contract engineering.
-- Check out the other [Brownie mixes](https://github.com/brownie-mix/) that can be used as a starting point for your own contracts. They also provide example code to help you get started.
-- ["Getting Started with Brownie"](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99) is a good tutorial to help you familiarize yourself with Brownie.
-- For more in-depth information, read the [Brownie documentation](https://eth-brownie.readthedocs.io/en/stable/).
+7. Prime contract with data from IPFS
 
-Any questions? Join our [Discord](https://discord.gg/2YHSAey)
+```bash
+pipenv run brownie run scripts/submit.py --network sepolia
+```
 
-## License
+8. Monitor status of contract
 
-This project is licensed under the [MIT license](LICENSE).
+```bash
+pipenv run brownie run scripts/checkstatus.py --network sepolia
+```

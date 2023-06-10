@@ -64,7 +64,7 @@ function Submit(data: TowerSubmission) {
             new File([buffer], 'tower.json', { type: 'application/json' }),
         ];
         const cid = await client.put(file);
-        console.log('stored file with cid:', cid);
+        console.log('tower cid:', cid);
         return cid;
     }
 
@@ -75,8 +75,8 @@ function Submit(data: TowerSubmission) {
         const cid = await buildData(data);
         const signer = await provider?.getSigner(0);
         const contractAddress = '';
-        
-        const contract = new ethers.Contract(contractAddress, [abi], provider);
+        //STUCK HERE
+        // const contract = new ethers.Contract(contractAddress, [abi], provider);
     }
 
     return (
