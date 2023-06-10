@@ -1,0 +1,49 @@
+.root {
+  width: 80px;
+  height: 50px;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.disconnect {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  width: 80px;
+  font-style: normal;
+  background-image: none;
+  background-color: #ffffff;
+  border-radius: 20px;
+  font-weight: 600;
+  height: 30px;
+  opacity: 1;
+  box-shadow: 3px 3px 2px rgba(0, 0, 0, 0);
+  cursor: auto;
+  border: 2px solid #ffffff;
+}
+.connect {
+  border-radius: 20px;
+  background-color: #ffffff;
+  width: 80px;
+  font-weight: 600;
+  height: 30px;
+  align-self: center;
+  border: 2px solid #ffffff;
+}
+.link {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 0px;
+  align-items: center;
+  justify-items: center;
+  justify-content: space-between;
+  align-content: space-between;
+  align-self: center;
+  text-align: center;
+}

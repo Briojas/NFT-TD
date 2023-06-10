@@ -3,5 +3,10 @@ import { NavBar } from '../../../components/nav-bar/nav-bar';
 
 export default createBoard({
     name: 'NavBar',
-    Board: () => <NavBar />
+    Board: () => <NavBar />,
+    environmentProps: {
+        windowWidth: 872,
+        windowHeight: 768,
+        canvasWidth: 1920,
+    },
 });

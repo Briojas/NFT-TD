@@ -1,0 +1,118 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+  background-color: #ffffff;
+  border-radius: 0rem;
+  overflow: hidden;
+  padding: 0px;
+  border: 2px solid black;
+  width: 100px;
+  max-width: 100px;
+}
+
+.tower {
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  box-shadow: none;
+  background-color: #ffffff;
+}
+
+.card-id {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  box-shadow: none;
+  margin-top: 0rem;
+  padding: 0px;
+  justify-items: stretch;
+  flex-wrap: nowrap;
+  align-content: space-around;
+  height: 20px;
+  width: 101px;
+}
+
+.tier {
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+  align-self: start;
+  margin-top: 0px;
+  display: flex;
+  font-size: 14px;
+  align-items: center;
+  align-content: center;
+  justify-content: start;
+  justify-items: center;
+  padding: 1px;
+  margin-right: 0px;
+}
+
+.operator {
+  font-size: 20px;
+  font-weight: 300;
+  text-align: justify;
+  padding: 0px;
+  height: 20px;
+}
+
+.priority {
+  border-bottom: 2px solid black;
+  border-left: 2px solid black;
+  align-self: start;
+  font-size: 14px;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  flex-direction: row;
+  margin: 0px;
+  padding: 1px;
+}
+
+.adjustor {
+  background-color: #ffffff;
+  border: 0px solid #000000;
+  width: 15px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  align-self: center;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 3px;
+}
+
+.data {
+  display: flex;
+  flex-direction: row;
+  font-size: 14px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-items: stretch;
+  justify-content: space-around;
+  height: 35px;
+  padding: 10px 0px 0px;
+}
+.power-selector {
+  display: flex;
+  flex-direction: column;
+}
+.data-value {
+  width: 30px;
+}
+.card-data {
+  height: 140px;
+}
+.priority-operator-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: start;
+  justify-content: start;
+  padding: 3px 0px 0px;
+  height: 20px;
+  width: 8px;
+}
