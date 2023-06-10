@@ -55,11 +55,31 @@ class MultiplicativeBehavior(models.Model):
         return super().save(*args, **kwargs)
 
 
+def default_cards():
+    return [
+        dict(name='Top1', card='Top1 card', prerequisites=[]),
+        dict(name='Top2', card='Top2 card', prerequisites=[]),
+        dict(name='Mid1', card='Mid1 card', prerequisites=['Top1']),
+        dict(name='Mid2', card='Mid2 card', prerequisites=['Top1', 'Top2']),
+        dict(name='Mid3', card='Mid3 card', prerequisites=['Top2']),
+        dict(name='Bot1', card='Bot1 card', prerequisites=['Mid1', 'Mid2']),
+        dict(name='Bot2', card='Bot2 card', prerequisites=['Mid2', 'Mid3']),
+    ]
+
 class TechTree(models.Model):
     cards = models.JSONField()
 
     @classmethod
     def create(cls, cards):
+        REQUIRED_CARDS = set(['Top1', 'Top2', 'Mid1', 'Mid2', 'Mid3', 'Bot1', 'Bot2'])
+        provided_cards = set(cards.keys())
+
+        missing_cards = REQUIRED_CARDS - provided_cards
+        excess_cards = provided_cards - REQUIRED_CARDS
+
+        if missing_cards or excess_cards:
+            raise ValueError(f"Invalid cards provided. Missing: {missing_cards}. Excess: {excess_cards}")
+
         tech_tree = cls()
         tech_tree.cards = {}
 
@@ -77,6 +97,7 @@ class TechTree(models.Model):
         tech_tree.add_prerequisite('Bot2', prerequisite='Mid2')
         tech_tree.add_prerequisite('Bot2', prerequisite='Mid3')
 
+        tech_tree.save()
         return tech_tree
 
     def __eq__(self, other):
@@ -87,24 +108,21 @@ class TechTree(models.Model):
     def add_card(self, card_name, card):
         # Add a card with no prerequisites
         if card_name not in self.cards:
-            self.cards[card_name] = {'card': card, 'prerequisites': set()}
+            self.cards[card_name] = {'card': card, 'prerequisites': list()}
 
     def add_prerequisite(self, card_name, prerequisite):
         # Add the prerequisite to the prerequisites for the card
         if prerequisite not in self.cards[card_name]['prerequisites']:
-            self.cards[card_name]['prerequisites'].add(prerequisite)
+            self.cards[card_name]['prerequisites'].append(prerequisite)
 
     def is_unlockable(self, card_name, unlocked_cards):
         # Returns true if any of the prerequisites for the card are in the list of unlocked cards
-        prereqs = self.cards[card_name]['prerequisites']
+        prereqs = set(self.cards[card_name]['prerequisites'])
         if prereqs:
             intersection = prereqs.intersection(set(unlocked_cards))
         else:
             return True
         return bool(intersection)
-
-    def save(self, *args, **kwargs):
-        return super().save(*args, **kwargs)
 
 
 class Tower(models.Model):
@@ -120,6 +138,7 @@ class Tower(models.Model):
 
     def level_up(self):
         self.tier += 1
+        self.save()
         # At this point, a card may be added to the tower
 
     def save(self, *args, **kwargs):
