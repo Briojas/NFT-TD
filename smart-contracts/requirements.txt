@@ -1,2 +1,4 @@
 eth-brownie
 python-dotenv
+cryptography
+PyNaCl
