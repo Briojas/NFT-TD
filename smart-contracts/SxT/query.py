@@ -33,10 +33,13 @@ def main():
     # https://docs.spaceandtime.io/reference/execute-queries-dql
     url = api_url + "sql/dql"
     
+    schema_table = "PRIME_CRUSADERS.CARDS"
+    sqlText = f"SELECT * FROM {schema_table}"
+
     # Get five transactions 
     payload = { 
-        "resourceId": "BRIOJAS_TESTING.DAPP",
-        "sqlText": "SELECT * FROM BRIOJAS_TESTING.DAPP"
+        "resourceId": schema_table,
+        "sqlText": sqlText
     }
     
     """ Get the latest Ethereum block 
