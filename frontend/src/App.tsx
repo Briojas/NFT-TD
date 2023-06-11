@@ -38,7 +38,16 @@ function Submit(data: TowerSubmission) {
         ];
         const cid = await client.put(file);
         console.log('stored files with cid:', cid);
-        return cid;
+        const built_card = {
+            id: cid,
+            teir: card.tier,
+            priority: card.priority,
+            operator: card.operator,
+            data1: card.data1,
+            data2: card.data2,
+            data3: card.data3,
+        };
+        return built_card;
     }
 
     async function buildData(data: TowerSubmission) {
@@ -65,6 +74,8 @@ function Submit(data: TowerSubmission) {
         ];
         const cid = await client.put(file);
         console.log('tower cid:', cid);
+        console.log('nft: ');
+        console.log(nft);
         return cid;
     }
 
