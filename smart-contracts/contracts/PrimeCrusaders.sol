@@ -125,9 +125,5 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
       mintingQueue.submissionBatch
     );
   }
-
-  function debug() public view returns (uint256, bool){
-    return (latestResponse.length, validFunctionResponse(mintingQueue.submissionBatch.length));
-  }
   //TODO: add resetting function
 }
