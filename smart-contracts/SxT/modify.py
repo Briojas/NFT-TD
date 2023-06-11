@@ -36,9 +36,19 @@ def main():
     # https://docs.spaceandtime.io/reference/modify-data-dml
     url = api_url + "sql/dml"
     
-    schema_table = "BRIOJAS_TESTING.TEST"
+    schema_table = "PRIME_CRUSADERS.CARDS"
+
+    card = {
+        'cid': '',
+        'teir': 0,
+        'priority': 1,
+        'operator': 3,
+        'data1': 2,
+        'data2': 11,
+        'data3': 5,
+    }
     
-    sqlText = f"INSERT INTO BRIOJAS_TESTING.DAPP (player_address, player_subscription) VALUES ('0x2B6eD29A95753C3Ad948348e3e7b1A251080Ffb9', 'prime')"
+    sqlText = f"INSERT INTO {schema_table} (card, teir, priority, operator, data1, data2, data3) VALUES ({card['cid']}, {card['teri']}, {card['priority']}, {card['operator']}, {card['data1']}, {card['data2']}, {card['data3']})"
 
     payload = {
         "resourceId": schema_table,

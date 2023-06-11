@@ -36,9 +36,9 @@ def main():
     # https://docs.spaceandtime.io/reference/modify-data-dml
     url = api_url + "sql/ddl"
     
-    schema_table = "BRIOJAS_TESTING.TEST"
+    schema_table = "PRIME_CRUSADERS.CARDS"
 
-    sqlText = f"CREATE TABLE BRIOJAS_TESTING.DAPP (player_address VARCHAR PRIMARY KEY, player_subscription VARCHAR) WITH \
+    sqlText = f"CREATE TABLE {schema_table} (card VARCHAR PRIMARY KEY, teir INT, priority INT, operator INT, data1 INT, data2 INT, data3 INT) WITH \
         \"public_key={biscuit_public_key},access_type=public_write\""
 
     payload = {
