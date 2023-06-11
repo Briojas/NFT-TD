@@ -38,17 +38,26 @@ def main():
     
     schema_table = "PRIME_CRUSADERS.CARDS"
 
-    card = {
-        'cid': '',
-        'teir': 0,
-        'priority': 1,
-        'operator': 3,
-        'data1': 2,
-        'data2': 11,
-        'data3': 5,
+    tower = {
+        "name":"PrimeCrusaders Tower",
+        "description":"Used in the PrimeCrusaders TD game",
+        "properties":{
+            "card1":{"id":"bafybeifs45dm2rqb2wpt4iif2ts6btgoajnmmu7i3zsa7ef74xtgohuu3u","teir":1,"priority":1,"operator":0,"data1":2,"data2":11,"data3":5},
+            "card2":{"id":"bafybeifjxcixtagebbxu3mptujnvggi6mifmcocnkb3cqycjtzwvqws5ui","teir":1,"priority":2,"operator":1,"data1":2,"data2":11,"data3":5},
+            "card3":{"id":"bafybeiagf36kcskkydiza5z6cwkkmeu4czb2tckwqik7otjxwcrea7nqaq","teir":2,"priority":3,"operator":2,"data1":2,"data2":11,"data3":5},
+            "card4":{"id":"bafybeihvup7eoznp5thrmhld6qqu3xxjmnnl6dyqwocp4zcjuimx2u237u","teir":2,"priority":4,"operator":3,"data1":2,"data2":11,"data3":5},
+            "card5":{"id":"bafybeifoz4hztzq7shggpn6wed2jetolxm62fzqowwdiqsafwrtnwrbgmu","teir":2,"priority":5,"operator":2,"data1":2,"data2":11,"data3":5},
+            "card6":{"id":"bafybeicbmrksl25k2rauirc7fulhezlznn2algdfm4gzxkfosz4lwb3wtm","teir":3,"priority":6,"operator":1,"data1":2,"data2":11,"data3":5},
+            "card7":{"id":"bafybeifebfq4mdik2n3xocthr7vxiiswyyp7ceqgudnworbzacuisg4w6q","teir":3,"priority":7,"operator":0,"data1":2,"data2":11,"data3":5}
+        }
     }
     
-    sqlText = f"INSERT INTO {schema_table} (card, teir, priority, operator, data1, data2, data3) VALUES ({card['cid']}, {card['teri']}, {card['priority']}, {card['operator']}, {card['data1']}, {card['data2']}, {card['data3']})"
+    sqlText = f"INSERT INTO {schema_table} (card, teir, priority, operator, data1, data2, data3) VALUES "
+    
+    for card in tower['properties']:
+        data = tower['properties'][card]
+        sqlText = sqlText + f"(\'{data['id']}\', {data['teir']}, {data['priority']}, {data['operator']}, {data['data1']}, {data['data2']}, {data['data3']}),"
+    sqlText = sqlText[:-1] #remove the last comma
 
     payload = {
         "resourceId": schema_table,
