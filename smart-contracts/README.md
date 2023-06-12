@@ -14,7 +14,7 @@ Solidity contract implements the following functionality:
 - custom IPFS CID processing queue library
   - powered by Automations
 
-## Setup
+## Brownie Setup
 
 1. install pipenv
 2. install dependencies
@@ -51,4 +51,36 @@ pipenv run brownie run scripts/submit.py --network sepolia
 
 ```bash
 pipenv run brownie run scripts/checkstatus.py --network sepolia
+```
+
+## Chainlink Functions Configuration
+
+testing using a fork of the official hardhat tool [here](https://github.com/Briojas/functions-hardhat-starter-kit)
+
+## SxT Setup
+
+...Work in progress
+
+for generating new access tokens:
+
+```bash
+pipenv run python sxt/register-authenticate.py username
+```
+
+for creating schemas and tables with ddl statements:
+
+```bash
+pipenv run python sxt/create.py
+```
+
+for inserting data into tables with dml statements:
+
+```bash
+pipenv run python sxt/modify.py
+```
+
+for querying data from tables with dql statements:
+
+```bash
+pipenv run python sxt/query.py
 ```
