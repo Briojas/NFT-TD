@@ -87,7 +87,7 @@ function Submit(data: TowerSubmission) {
 
         const eth_provider = new ethers.BrowserProvider(connector.provider);
         const eth_signer = await eth_provider.getSigner();
-        const contractAddress = '0x9f6105FB3b13F99F074cDC0CDDbc8222a9cc5129';
+        const contractAddress = '0x15F8a5b8400E203f7C4159c5EaF82A98B7671698';
         const contract = new ethers.Contract(contractAddress, abi.abi, eth_signer);
 
         const tx = await contract.joinQueue(cid);

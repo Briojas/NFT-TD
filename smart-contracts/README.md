@@ -1,6 +1,6 @@
 # PrimeCrusaders Contract
 
-- address: 0x9f6105FB3b13F99F074cDC0CDDbc8222a9cc5129
+- address: 0x15F8a5b8400E203f7C4159c5EaF82A98B7671698
 
 ## Description
 

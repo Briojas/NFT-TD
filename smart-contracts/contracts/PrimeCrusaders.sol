@@ -21,6 +21,8 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
    * @notice Executes once when a contract is created to initialize state variables
    *
    * @param oracle The FunctionsOracle contract
+   * @param sourceCode The source code of the Functions job
+   * @param secrets The encrypted secrets used in executing the source code
    * @param subscriptionId The Functions billing subscription ID used to pay for Functions requests
    * @param fulfillGasLimit Maximum amount of gas used to call the client contract's `handleOracleFulfillment` function
    * @param _mintInterval Time interval at which Chainlink Automation should call performUpkeep
@@ -28,11 +30,12 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
   constructor(
     address oracle, //Sepolia Functions Oracle address: "0x649a2C205BE7A3d5e99206CEEFF30c794f0E31EC"
     string memory sourceCode,
+    bytes memory secrets,
     uint64 subscriptionId,
     uint32 fulfillGasLimit,
     uint256 _mintInterval,
     uint256 _mintBatchSize
-  ) ERC1155IPFS() FunctionsWrapper(oracle, sourceCode, subscriptionId, fulfillGasLimit) {
+  ) ERC1155IPFS() FunctionsWrapper(oracle, sourceCode, secrets, subscriptionId, fulfillGasLimit) {
     mintInterval = _mintInterval;
     mintBatchSize = _mintBatchSize;
     // lastUpkeepTimeStamp = block.timestamp; //uneeded until batch processing implemented  
@@ -86,23 +89,26 @@ contract PrimeCrusaders is ERC1155IPFS, FunctionsWrapper, AutomationCompatibleIn
     //sends mint request off to Chainlink Functions to be verified 
   function submit() internal {
     mintingQueue.build_batch();
-    executeRequest("", mintingQueue.submissionBatch); //secrets unused for now
+    executeRequest(mintingQueue.submissionBatch); //secrets unused for now
   }
 
     //mints valid NFTs
   function issue() internal {
-    require (validFunctionResponse(mintingQueue.submissionBatch.length));
-    address user;
-    string memory ipfs_url;
-    for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
-        //TODO: update for batch processing
-      (user, ipfs_url, ) = mintingQueue.current_ticket();
-      if(latestResponse[responseHeaderSize + i] == "1"){
-        mintToken(user, ipfs_url, 1);
-        mintingQueue.ticket_approved(true);
-      } else {
-        mintingQueue.ticket_approved(false);
+    if(latestResponse.length > latestError.length && latestResponse.length > responseHeaderSize){ //todo: refactor
+      address user;
+      string memory ipfs_url;
+      for (uint256 i; i < mintingQueue.submissionBatch.length; i++){
+          //TODO: update for batch processing
+        (user, ipfs_url, ) = mintingQueue.current_ticket();
+        if(latestResponse[responseHeaderSize + i] == "1"){
+          mintToken(user, ipfs_url, 1);
+          mintingQueue.ticket_approved(true);
+        } else {
+          mintingQueue.ticket_approved(false);
+        }
       }
+    } else {
+      mintingQueue.ticket_approved(false); //todo: update to retry processing
     }
   }
 
